@@ -542,7 +542,7 @@
   <section class="archive">
     <div class="archive-header">
       <h2>Recent Briefs</h2>
-      <a href="#" class="archive-link" id="substack-link">VIEW ALL ON SUBSTACK →</a>
+      <a href="https://damdoc.substack.com/" class="archive-link" id="substack-link" target="_blank" rel="noopener">VIEW ALL ON SUBSTACK →</a>
     </div>
     <div class="archive-grid" id="archive-grid">
       <!-- populated by JS -->
@@ -645,25 +645,25 @@ const MOCK_DATA = {
       issue: "ISSUE 08",
       title: "EDAM go-live: PacifiCorp's first week and the COI basis question",
       date: "May 11, 2026",
-      url: "https://wecchydrobrief.substack.com/"
+      url: "https://damdoc.substack.com/"
     },
     {
       issue: "ISSUE 07",
       title: "17% YoY PNW hydro growth meets 12% Oregon snowpack — both true",
       date: "May 4, 2026",
-      url: "https://wecchydrobrief.substack.com/"
+      url: "https://damdoc.substack.com/"
     },
     {
       issue: "ISSUE 06",
       title: "FERC rescinds WECC soft cap: what changes for Mid-C scarcity hours",
       date: "Apr 27, 2026",
-      url: "https://wecchydrobrief.substack.com/"
+      url: "https://damdoc.substack.com/"
     },
     {
       issue: "ISSUE 05",
       title: "BC Treaty water timing and the Mid-C basis through August",
       date: "Apr 20, 2026",
-      url: "https://wecchydrobrief.substack.com/"
+      url: "https://damdoc.substack.com/"
     }
   ]
 };
@@ -672,8 +672,36 @@ const MOCK_DATA = {
 // RENDER
 // ─────────────────────────────────────────────────────────────
 
-// In production replace with: fetch('./data/dashboard.json').then(r=>r.json()).then(render)
-function bootstrap() { render(MOCK_DATA); }
+// Try live JSON first; fall back to mock if the fetcher hasn't run yet
+// or the file is malformed. This keeps the dashboard usable end-to-end.
+function bootstrap() {
+  fetch('./data/dashboard.json?t=' + Date.now())
+    .then(r => r.ok ? r.json() : Promise.reject('HTTP ' + r.status))
+    .then(d => {
+      // If the fetcher ran but returned no data (e.g., all sources failed),
+      // merge with mock so the page doesn't look broken. Real data wins.
+      const merged = mergeWithMock(d);
+      render(merged);
+    })
+    .catch(err => {
+      console.warn('dashboard.json unavailable, using mock data:', err);
+      render(MOCK_DATA);
+    });
+}
+
+function mergeWithMock(live) {
+  const out = JSON.parse(JSON.stringify(MOCK_DATA)); // deep clone
+  if (live.meta && live.meta.last_updated_pt) out.meta = live.meta;
+  if (live.basins && live.basins.length)       out.basins = live.basins;
+  if (live.wsf && Object.keys(live.wsf).length) out.wsf = live.wsf;
+  if (live.midc && live.midc.peak_da != null)   out.midc = live.midc;
+  if (live.bpa_mix && live.bpa_mix.hydro_pct != null) out.bpa_mix = live.bpa_mix;
+  if (live.usace && live.usace.length)          out.usace = live.usace;
+  if (live.caiso && live.caiso.hydro_mw != null) out.caiso = live.caiso;
+  if (live.regulatory && live.regulatory.length) out.regulatory = live.regulatory;
+  if (live.archive && live.archive.length)      out.archive = live.archive;
+  return out;
+}
 
 function render(d) {
   document.getElementById('last-updated').textContent = d.meta.last_updated_pt;
