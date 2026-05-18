@@ -1,0 +1,46 @@
+{
+  "meta": {
+    "last_updated_pt": "2026-05-18 11:00 PT",
+    "next_update_pt": "2026-05-19 11:00 PT",
+    "sources_ok": [
+      "bpa_mix"
+    ]
+  },
+  "basins": [],
+  "wsf": {},
+  "midc": {},
+  "bpa_mix": {
+    "hydro_pct": 72,
+    "wind_pct": 12,
+    "thermal_pct": 15
+  },
+  "usace": [],
+  "caiso": {},
+  "regulatory": [],
+  "archive": [
+    {
+      "issue": "ISSUE 08",
+      "title": "EDAM go-live: PacifiCorp's first week and the COI basis question",
+      "date": "May 11, 2026",
+      "url": "https://wecchydrobrief.substack.com/"
+    },
+    {
+      "issue": "ISSUE 07",
+      "title": "17% YoY PNW hydro growth meets 12% Oregon snowpack \u2014 both true",
+      "date": "May 4, 2026",
+      "url": "https://wecchydrobrief.substack.com/"
+    },
+    {
+      "issue": "ISSUE 06",
+      "title": "FERC rescinds WECC soft cap: what changes for Mid-C scarcity hours",
+      "date": "Apr 27, 2026",
+      "url": "https://wecchydrobrief.substack.com/"
+    },
+    {
+      "issue": "ISSUE 05",
+      "title": "BC Treaty water timing and the Mid-C basis through August",
+      "date": "Apr 20, 2026",
+      "url": "https://wecchydrobrief.substack.com/"
+    }
+  ]
+}
