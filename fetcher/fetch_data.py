@@ -147,57 +147,52 @@ def fetch_eia_bpa_mix() -> Optional[Dict[str, int]]:
 
 def fetch_eia_midc_price() -> Optional[Dict[str, Any]]:
     """
-    EIA wholesale electricity dashboard, Mid-Columbia hub (DA peak/off-peak).
-    Returns latest value + 30-trading-day history. T-1 lag is acceptable.
+    Scrape Mid-C peak wholesale spot price from EIA's Today in Energy
+    daily prices page. Updates weekdays ~07:30-08:30 ET.
 
-    Endpoint: https://api.eia.gov/v2/electricity/wholesale/prices/data/
-    Filter:   facets[location]=MIDC
+    Source: https://www.eia.gov/todayinenergy/prices.php
+
+    Note: EIA's v2 API does not expose ICE hub prices, only via web pages
+    and bulk XLS downloads. This scrape is the simplest working path.
     """
-    if not EIA_API_KEY:
-        _log("  ⚠ EIA_API_KEY unset — skipping Mid-C price")
-        return None
+    from bs4 import BeautifulSoup
 
-    end   = datetime.date.today()
-    start = end - datetime.timedelta(days=45)
-    url   = "https://api.eia.gov/v2/electricity/wholesale/prices/data/"
-    params = {
-        "api_key": EIA_API_KEY,
-        "frequency": "daily",
-        "data[0]": "price",
-        "facets[location][]": "MIDC",
-        "start": start.isoformat(),
-        "end":   end.isoformat(),
-        "sort[0][column]": "period",
-        "sort[0][direction]": "desc",
-        "length": 200,
-    }
-    r = requests.get(url, params=params, timeout=HTTP_TIMEOUT)
+    url = "https://www.eia.gov/todayinenergy/prices.php"
+    headers = {"User-Agent": "WECC-Hydro-Brief/1.0 (https://wecchydrobrief.com)"}
+    r = requests.get(url, timeout=HTTP_TIMEOUT, headers=headers)
     r.raise_for_status()
-    rows = r.json().get("response", {}).get("data", [])
-    if not rows:
+
+    soup = BeautifulSoup(r.text, "html.parser")
+    midc_price = None
+
+    for row in soup.find_all("tr"):
+        cells = row.find_all("td")
+        if len(cells) < 2:
+            continue
+        row_text = " ".join(c.get_text(strip=True) for c in cells).lower()
+        if "mid" in row_text and ("columbia" in row_text or "mid-c" in row_text or "mid c" in row_text):
+            for cell in cells:
+                txt = cell.get_text(strip=True).replace("$", "").replace(",", "").strip()
+                try:
+                    v = float(txt)
+                    if 5 < v < 500:  # sanity: typical Mid-C $/MWh range
+                        midc_price = v
+                        break
+                except ValueError:
+                    continue
+            if midc_price:
+                break
+
+    if midc_price is None:
+        _log("  ⚠ Mid-C row not found in EIA Today in Energy table")
         return None
 
-    # Split peak vs off-peak series (EIA labels them as separate timeseries).
-    peak = [r for r in rows if (r.get("type") or "").lower().startswith("peak")]
-    offp = [r for r in rows if "off"  in (r.get("type") or "").lower()]
-    peak.sort(key=lambda x: x.get("period", ""))
-    offp.sort(key=lambda x: x.get("period", ""))
-
-    if not peak:
-        return None
-    latest = peak[-1]
-    prior_wk = next((p for p in reversed(peak[:-1]) if p.get("period") <= (datetime.date.today() - datetime.timedelta(days=7)).isoformat()), None)
-    wow = None
-    if prior_wk and prior_wk.get("price"):
-        wow = (latest["price"] - prior_wk["price"]) / prior_wk["price"] * 100
-
-    history = [{"d": _fmt_short_date(p["period"]), "p": round(p["price"], 2)} for p in peak[-30:] if p.get("price") is not None]
-    _log(f"  ✓ Mid-C peak DA: ${latest.get('price'):.2f}/MWh ({latest.get('period')})")
+    _log(f"  ✓ Mid-C peak DA: ${midc_price:.2f}/MWh (EIA Today in Energy)")
     return {
-        "peak_da":    round(latest["price"], 2),
-        "offpeak_da": round(offp[-1]["price"], 2) if offp else None,
-        "wow_pct":    round(wow, 1) if wow is not None else None,
-        "history":    history,
+        "peak_da":    round(midc_price, 2),
+        "offpeak_da": None,
+        "wow_pct":    None,
+        "history":    [],  # 30-day history comes later via XLS bulk download
     }
 
 
