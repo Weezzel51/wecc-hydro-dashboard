@@ -887,22 +887,23 @@ function render(d) {
   }
 
   // Regulatory pulse
+  const escAttr = (s) => String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const escText = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const newsList = document.getElementById('news-list');
   if (!d.regulatory.length) {
-    newsList.innerHTML = `<li class="news-item" style="text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:11px;">No recent filings tracked</li>`;
+    newsList.innerHTML = '<li class="news-item" style="text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:11px;">No recent filings tracked</li>';
   } else {
     newsList.innerHTML = d.regulatory.map(n => {
-      const url = n.url && n.url.length ? n.url : '#';
-      const wrap = url !== '#';
-      const meta = [n.date, n.source].filter(Boolean).join(' · ');
-      const inner = `
-        <div><span class="news-tag ${n.tag_class}">${n.tag}</span></div>
-        <div class="news-title">${n.title}</div>
-        <div class="news-meta">${meta}</div>
-      `;
-      return wrap
-        ? `<li class="news-item"><a href="${url}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;">${inner}</a></li>`
-        : `<li class="news-item">${inner}</li>`;
+      const hasUrl = n.url && String(n.url).length > 1;
+      const meta = [n.date, n.source].filter(Boolean).map(escText).join(' · ');
+      const inner =
+        '<div><span class="news-tag ' + escAttr(n.tag_class) + '">' + escText(n.tag) + '</span></div>' +
+        '<div class="news-title">' + escText(n.title) + '</div>' +
+        '<div class="news-meta">' + meta + '</div>';
+      if (hasUrl) {
+        return '<li class="news-item"><a href="' + escAttr(n.url) + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;">' + inner + '</a></li>';
+      }
+      return '<li class="news-item">' + inner + '</li>';
     }).join('');
   }
 
