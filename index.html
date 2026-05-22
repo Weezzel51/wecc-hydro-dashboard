@@ -393,8 +393,8 @@
     </div>
     <div class="status-block">
       <div><span class="pulse"></span>LIVE</div>
-      <div>Last updated: <span class="timestamp" id="last-updated">2026-05-18 06:00 PT</span></div>
-      <div>Next refresh: <span id="next-update">2026-05-19 06:00 PT</span></div>
+      <div>Last updated: <span class="timestamp" id="last-updated">—</span></div>
+      <div>Next refresh: <span id="next-update">—</span></div>
     </div>
   </div>
   <div class="gold-rule"></div>
@@ -413,12 +413,11 @@
       </div>
       <div class="panel-body">
         <div class="headline">
-          <span class="value" id="wsf-value">82</span>
+          <span class="value" id="wsf-value">—</span>
           <span class="unit">% of normal · Apr–Sep WSF, The Dalles</span>
         </div>
-        <div class="headline-sub">
-          Latest NWRFC forecast: <strong style="color: var(--text);">96.4 MAF</strong> unregulated runoff
-          <span class="delta down">−4.2 MAF vs prior</span>
+        <div class="headline-sub" id="wsf-sub">
+          NWRFC forecast pending
         </div>
 
         <table class="basin-table" id="basin-table">
@@ -445,27 +444,25 @@
       </div>
       <div class="panel-body">
         <div class="headline">
-          <span class="value" id="midc-value">$28.45</span>
+          <span class="value" id="midc-value">—</span>
           <span class="unit">/MWh · Mid-C peak DA</span>
         </div>
-        <div class="headline-sub">
-          Off-peak: <strong style="color: var(--text);">$11.20/MWh</strong>
-          <span class="delta down">−18% WoW</span>
-          · Spring runoff compressing prices
+        <div class="headline-sub" id="midc-sub">
+          ICE EOD price pending
         </div>
 
         <div class="stat-row">
           <div class="stat gold">
             <div class="label">BPA Hydro %</div>
-            <div class="num" id="bpa-hydro-pct">81%</div>
+            <div class="num" id="bpa-hydro-pct">—</div>
           </div>
           <div class="stat">
             <div class="label">Wind %</div>
-            <div class="num" id="bpa-wind-pct">9%</div>
+            <div class="num" id="bpa-wind-pct">—</div>
           </div>
           <div class="stat">
             <div class="label">Thermal %</div>
-            <div class="num" id="bpa-therm-pct">10%</div>
+            <div class="num" id="bpa-therm-pct">—</div>
           </div>
         </div>
 
@@ -510,12 +507,11 @@
       </div>
       <div class="panel-body">
         <div class="headline">
-          <span class="value" id="caiso-hydro-mw">3,420</span>
+          <span class="value" id="caiso-hydro-mw">—</span>
           <span class="unit">MW</span>
         </div>
-        <div class="headline-sub">
-          Hydro share of CAISO load: <strong style="color: var(--text);">12.4%</strong>
-          · SP15 DA: <strong style="color: var(--text);">$34.10</strong>
+        <div class="headline-sub" id="caiso-sub">
+          OASIS feed pending
         </div>
         <div class="chart-wrap small">
           <canvas id="caiso-chart"></canvas>
@@ -562,198 +558,147 @@
 <script>
 // ─────────────────────────────────────────────────────────────
 // DATA LAYER
-// In production this is fetched from /data/*.json files written
-// daily by the GitHub Actions cron job. Inline mocks below show
-// the JSON shape the Python fetcher must produce.
+// Live JSON is written daily by GitHub Actions to /data/dashboard.json.
+// Frontend fetches it, falls back to mock if the file is missing,
+// and shows "—" for any field the fetcher hasn't populated yet.
 // ─────────────────────────────────────────────────────────────
 
 const MOCK_DATA = {
   meta: {
-    last_updated_pt: "2026-05-18 06:00 PT",
-    next_update_pt:  "2026-05-19 06:00 PT"
+    last_updated_pt: "loading…",
+    next_update_pt:  "—"
   },
-  basins: [
-    { name: "Upper Columbia",  swe_in: 14.2, pct_median: 78, delta_7d: -8 },
-    { name: "Snake River",     swe_in: 11.8, pct_median: 64, delta_7d: -12 },
-    { name: "Clearwater",      swe_in: 16.5, pct_median: 81, delta_7d: -9 },
-    { name: "Salmon",          swe_in: 13.1, pct_median: 71, delta_7d: -10 },
-    { name: "Yakima",          swe_in:  8.4, pct_median: 58, delta_7d: -14 },
-    { name: "Owyhee",          swe_in:  4.2, pct_median: 31, delta_7d: -22 }
-  ],
-  wsf: {
-    site: "The Dalles",
-    forecast_maf: 96.4,
-    pct_normal: 82,
-    delta_prior_maf: -4.2
-  },
-  midc: {
-    peak_da: 28.45,
-    offpeak_da: 11.20,
-    wow_pct: -18,
-    history: [
-      // last 30 trading days, peak DA $/MWh
-      { d: "Apr 18", p: 41.20 }, { d: "Apr 21", p: 39.85 }, { d: "Apr 22", p: 38.10 },
-      { d: "Apr 23", p: 37.50 }, { d: "Apr 24", p: 36.20 }, { d: "Apr 25", p: 35.80 },
-      { d: "Apr 28", p: 34.95 }, { d: "Apr 29", p: 34.10 }, { d: "Apr 30", p: 33.50 },
-      { d: "May 1",  p: 32.80 }, { d: "May 2",  p: 32.40 }, { d: "May 5",  p: 31.90 },
-      { d: "May 6",  p: 31.25 }, { d: "May 7",  p: 30.80 }, { d: "May 8",  p: 30.40 },
-      { d: "May 9",  p: 29.95 }, { d: "May 12", p: 29.60 }, { d: "May 13", p: 29.20 },
-      { d: "May 14", p: 29.00 }, { d: "May 15", p: 28.70 }, { d: "May 16", p: 28.45 }
-    ]
-  },
-  bpa_mix: { hydro_pct: 81, wind_pct: 9, thermal_pct: 10 },
-  usace: [
-    { project: "Grand Coulee", discharge_kcfs: 142, forebay_ft: 1283.4 },
-    { project: "Chief Joseph", discharge_kcfs: 138, forebay_ft:  954.2 },
-    { project: "The Dalles",   discharge_kcfs: 218, forebay_ft:  158.6 },
-    { project: "Bonneville",   discharge_kcfs: 222, forebay_ft:   74.1 }
-  ],
-  caiso: {
-    hydro_mw: 3420,
-    hydro_share_pct: 12.4,
-    sp15_da: 34.10,
-    history: [
-      { h: "00", mw: 2100 }, { h: "03", mw: 1850 }, { h: "06", mw: 2400 },
-      { h: "09", mw: 3100 }, { h: "12", mw: 3600 }, { h: "15", mw: 3950 },
-      { h: "18", mw: 4200 }, { h: "21", mw: 3050 }
-    ]
-  },
-  regulatory: [
-    {
-      tag: "FERC", tag_class: "ferc",
-      title: "FERC accepts PacifiCorp EDAM participation amendments (Docket ER26-XXX)",
-      date: "2026-05-16", source: "FERC eLibrary"
-    },
-    {
-      tag: "MARKET", tag_class: "market",
-      title: "EDAM Phase 1 settlements clear; first congestion rents reported on COI",
-      date: "2026-05-14", source: "CAISO Market Notice"
-    },
-    {
-      tag: "OPS", tag_class: "ops",
-      title: "BPA issues spring spill operations memo; Lower Snake TDG monitoring active",
-      date: "2026-05-12", source: "BPA Transmission"
-    },
-    {
-      tag: "FERC", tag_class: "ferc",
-      title: "NW Energy Coalition files protest on PSH cost allocation (Docket EL26-XXX)",
-      date: "2026-05-09", source: "FERC eLibrary"
-    }
-  ],
+  basins: [],
+  wsf: { site: "The Dalles", pct_normal: null, forecast_maf: null, delta_prior_maf: null },
+  midc: { peak_da: null, offpeak_da: null, wow_pct: null, history: [] },
+  bpa_mix: { hydro_pct: null, wind_pct: null, thermal_pct: null },
+  usace: [],
+  caiso: { hydro_mw: null, hydro_share_pct: null, sp15_da: null, history: [] },
+  regulatory: [],
   archive: [
-    {
-      issue: "ISSUE 08",
-      title: "EDAM go-live: PacifiCorp's first week and the COI basis question",
-      date: "May 11, 2026",
-      url: "https://damdoc.substack.com/"
-    },
-    {
-      issue: "ISSUE 07",
-      title: "17% YoY PNW hydro growth meets 12% Oregon snowpack — both true",
-      date: "May 4, 2026",
-      url: "https://damdoc.substack.com/"
-    },
-    {
-      issue: "ISSUE 06",
-      title: "FERC rescinds WECC soft cap: what changes for Mid-C scarcity hours",
-      date: "Apr 27, 2026",
-      url: "https://damdoc.substack.com/"
-    },
-    {
-      issue: "ISSUE 05",
-      title: "BC Treaty water timing and the Mid-C basis through August",
-      date: "Apr 20, 2026",
-      url: "https://damdoc.substack.com/"
-    }
+    { issue: "—", title: "Loading recent briefs…", date: "", url: "https://damdoc.substack.com/" }
   ]
 };
 
 // ─────────────────────────────────────────────────────────────
-// RENDER
+// BOOTSTRAP
 // ─────────────────────────────────────────────────────────────
-
-// Try live JSON first; fall back to mock if the fetcher hasn't run yet
-// or the file is malformed. This keeps the dashboard usable end-to-end.
 function bootstrap() {
   fetch('./data/dashboard.json?t=' + Date.now())
     .then(r => r.ok ? r.json() : Promise.reject('HTTP ' + r.status))
-    .then(d => {
-      // If the fetcher ran but returned no data (e.g., all sources failed),
-      // merge with mock so the page doesn't look broken. Real data wins.
-      const merged = mergeWithMock(d);
-      render(merged);
-    })
+    .then(d => render(applyLiveData(d)))
     .catch(err => {
-      console.warn('dashboard.json unavailable, using mock data:', err);
+      console.warn('dashboard.json unavailable, using fallback:', err);
       render(MOCK_DATA);
     });
 }
 
-function mergeWithMock(live) {
-  const out = JSON.parse(JSON.stringify(MOCK_DATA)); // deep clone
+// Live fields override; missing fields stay null so render() shows "—".
+function applyLiveData(live) {
+  const out = JSON.parse(JSON.stringify(MOCK_DATA));
   if (live.meta && live.meta.last_updated_pt) out.meta = live.meta;
-  if (live.basins && live.basins.length)       out.basins = live.basins;
-  if (live.wsf && Object.keys(live.wsf).length) out.wsf = live.wsf;
-  if (live.midc && live.midc.peak_da != null)   out.midc = live.midc;
+
   if (live.bpa_mix && live.bpa_mix.hydro_pct != null) out.bpa_mix = live.bpa_mix;
-  if (live.usace && live.usace.length)          out.usace = live.usace;
-  if (live.caiso && live.caiso.hydro_mw != null) out.caiso = live.caiso;
-  if (live.regulatory && live.regulatory.length) out.regulatory = live.regulatory;
-  if (live.archive && live.archive.length)      out.archive = live.archive;
+  if (live.midc    && live.midc.peak_da     != null) out.midc    = live.midc;
+  if (live.wsf     && live.wsf.pct_normal   != null) out.wsf     = live.wsf;
+  if (live.caiso   && live.caiso.hydro_mw   != null) out.caiso   = live.caiso;
+
+  if (live.basins      && live.basins.length)      out.basins      = live.basins;
+  if (live.usace       && live.usace.length)       out.usace       = live.usace;
+  if (live.regulatory  && live.regulatory.length)  out.regulatory  = live.regulatory;
+  if (live.archive     && live.archive.length)     out.archive     = live.archive;
   return out;
 }
 
+// Format helper: value or em-dash if null/undefined.
+function fmt(v, prefix, suffix, decimals) {
+  if (v == null) return '—';
+  prefix = prefix || ''; suffix = suffix || '';
+  const n = (decimals != null) ? Number(v).toFixed(decimals) : v;
+  return prefix + n + suffix;
+}
+
+// ─────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────
 function render(d) {
   document.getElementById('last-updated').textContent = d.meta.last_updated_pt;
   document.getElementById('next-update').textContent  = d.meta.next_update_pt;
 
-  // Headlines
-  document.getElementById('wsf-value').textContent = d.wsf.pct_normal;
-  document.getElementById('midc-value').textContent = '$' + d.midc.peak_da.toFixed(2);
-  document.getElementById('bpa-hydro-pct').textContent = d.bpa_mix.hydro_pct + '%';
-  document.getElementById('bpa-wind-pct').textContent  = d.bpa_mix.wind_pct  + '%';
-  document.getElementById('bpa-therm-pct').textContent = d.bpa_mix.thermal_pct + '%';
-  document.getElementById('caiso-hydro-mw').textContent = d.caiso.hydro_mw.toLocaleString();
+  // Headline values
+  document.getElementById('wsf-value').textContent     = fmt(d.wsf.pct_normal);
+  document.getElementById('midc-value').textContent    = fmt(d.midc.peak_da, '$', '', 2);
+  document.getElementById('bpa-hydro-pct').textContent = fmt(d.bpa_mix.hydro_pct, '', '%');
+  document.getElementById('bpa-wind-pct').textContent  = fmt(d.bpa_mix.wind_pct,  '', '%');
+  document.getElementById('bpa-therm-pct').textContent = fmt(d.bpa_mix.thermal_pct, '', '%');
+  document.getElementById('caiso-hydro-mw').textContent = d.caiso.hydro_mw != null
+    ? d.caiso.hydro_mw.toLocaleString()
+    : '—';
+
+  // Sub-text lines
+  document.getElementById('wsf-sub').innerHTML = d.wsf.forecast_maf != null
+    ? `NWRFC forecast: <strong style="color:var(--text);">${d.wsf.forecast_maf} MAF</strong> unregulated runoff`
+    : 'NWRFC forecast pending';
+  document.getElementById('midc-sub').innerHTML = d.midc.offpeak_da != null
+    ? `Off-peak: <strong style="color:var(--text);">$${d.midc.offpeak_da.toFixed(2)}/MWh</strong>`
+    : (d.midc.peak_da != null ? 'Peak DA live · off-peak history pending' : 'ICE EOD price pending');
+  document.getElementById('caiso-sub').innerHTML = d.caiso.sp15_da != null
+    ? `Hydro share: <strong style="color:var(--text);">${d.caiso.hydro_share_pct}%</strong> · SP15 DA: <strong style="color:var(--text);">$${d.caiso.sp15_da.toFixed(2)}</strong>`
+    : 'OASIS feed pending';
 
   // Basin table
   const basinTbody = document.getElementById('basin-tbody');
-  basinTbody.innerHTML = d.basins.map(b => {
-    const cls = b.pct_median < 50 ? 'low' : b.pct_median < 75 ? 'mid' : b.pct_median < 110 ? 'normal' : 'high';
-    const fillPct = Math.min(b.pct_median, 130) / 130 * 100;
-    const dCls = b.delta_7d > 0 ? 'up' : b.delta_7d < 0 ? 'down' : 'flat';
-    const dSign = b.delta_7d > 0 ? '+' : '';
-    return `
-      <tr>
-        <td>${b.name}</td>
-        <td class="num">${b.swe_in.toFixed(1)}"</td>
-        <td class="bar-cell">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="bar-track" style="flex:1;"><div class="bar-fill ${cls}" style="width:${fillPct}%"></div></div>
-            <span style="font-family:var(--mono);font-size:12px;min-width:36px;text-align:right;">${b.pct_median}%</span>
-          </div>
-        </td>
-        <td class="num"><span class="delta ${dCls}">${dSign}${b.delta_7d}</span></td>
-      </tr>
-    `;
-  }).join('');
+  if (!d.basins.length) {
+    basinTbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-faint);padding:24px;font-family:var(--mono);font-size:11px;">Basin data not yet available</td></tr>`;
+  } else {
+    basinTbody.innerHTML = d.basins.map(b => {
+      const cls = b.pct_median < 50 ? 'low' : b.pct_median < 75 ? 'mid' : b.pct_median < 110 ? 'normal' : 'high';
+      const fillPct = Math.min(b.pct_median, 130) / 130 * 100;
+      const dCls = b.delta_7d > 0 ? 'up' : b.delta_7d < 0 ? 'down' : 'flat';
+      const dSign = b.delta_7d > 0 ? '+' : '';
+      return `
+        <tr>
+          <td>${b.name}</td>
+          <td class="num">${b.swe_in.toFixed(1)}"</td>
+          <td class="bar-cell">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="bar-track" style="flex:1;"><div class="bar-fill ${cls}" style="width:${fillPct}%"></div></div>
+              <span style="font-family:var(--mono);font-size:12px;min-width:36px;text-align:right;">${b.pct_median}%</span>
+            </div>
+          </td>
+          <td class="num"><span class="delta ${dCls}">${dSign}${b.delta_7d}</span></td>
+        </tr>
+      `;
+    }).join('');
+  }
 
   // USACE table
-  document.getElementById('usace-tbody').innerHTML = d.usace.map(u => `
-    <tr>
-      <td>${u.project}</td>
-      <td class="num">${u.discharge_kcfs} kcfs</td>
-      <td class="num">${u.forebay_ft.toFixed(1)} ft</td>
-    </tr>
-  `).join('');
+  const usaceTbody = document.getElementById('usace-tbody');
+  if (!d.usace.length) {
+    usaceTbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:24px;font-family:var(--mono);font-size:11px;">USACE data not yet available</td></tr>`;
+  } else {
+    usaceTbody.innerHTML = d.usace.map(u => `
+      <tr>
+        <td>${u.project}</td>
+        <td class="num">${u.discharge_kcfs} kcfs</td>
+        <td class="num">${u.forebay_ft.toFixed(1)} ft</td>
+      </tr>
+    `).join('');
+  }
 
   // Regulatory pulse
-  document.getElementById('news-list').innerHTML = d.regulatory.map(n => `
-    <li class="news-item">
-      <div><span class="news-tag ${n.tag_class}">${n.tag}</span></div>
-      <div class="news-title">${n.title}</div>
-      <div class="news-meta">${n.date} · ${n.source}</div>
-    </li>
-  `).join('');
+  const newsList = document.getElementById('news-list');
+  if (!d.regulatory.length) {
+    newsList.innerHTML = `<li class="news-item" style="text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:11px;">No recent filings tracked</li>`;
+  } else {
+    newsList.innerHTML = d.regulatory.map(n => `
+      <li class="news-item">
+        <div><span class="news-tag ${n.tag_class}">${n.tag}</span></div>
+        <div class="news-title">${n.title}</div>
+        <div class="news-meta">${n.date} · ${n.source}</div>
+      </li>
+    `).join('');
+  }
 
   // Archive
   document.getElementById('archive-grid').innerHTML = d.archive.map(a => `
@@ -765,8 +710,20 @@ function render(d) {
   `).join('');
 
   // Charts
-  renderMidCChart(d.midc.history);
-  renderCAISOChart(d.caiso.history);
+  if (d.midc.history && d.midc.history.length) renderMidCChart(d.midc.history);
+  else clearChart('midc-chart', '30-day history not yet available');
+  if (d.caiso.history && d.caiso.history.length) renderCAISOChart(d.caiso.history);
+  else clearChart('caiso-chart', 'Hourly dispatch not yet available');
+}
+
+function clearChart(canvasId, msg) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#5e6275';
+  ctx.font = '11px -apple-system, "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
 }
 
 // Chart.js defaults
