@@ -1,9 +1,10 @@
 {
   "meta": {
-    "last_updated_pt": "2026-05-21 19:58 PT",
-    "next_update_pt": "2026-05-22 19:58 PT",
+    "last_updated_pt": "2026-05-21 20:42 PT",
+    "next_update_pt": "2026-05-22 20:42 PT",
     "sources_ok": [
-      "bpa_mix"
+      "bpa_mix",
+      "regulatory"
     ]
   },
   "basins": [],
@@ -16,7 +17,56 @@
   },
   "usace": [],
   "caiso": {},
-  "regulatory": [],
+  "regulatory": [
+    {
+      "tag": "FERC",
+      "tag_class": "ferc",
+      "title": "Columbia Gulf Transmission, LLC",
+      "date": "2026-05-13",
+      "source": "FERC eLibrary",
+      "url": "https://ferc.gov/"
+    },
+    {
+      "tag": "FERC",
+      "tag_class": "ferc",
+      "title": "Columbia Gas Transmission, LLC",
+      "date": "2026-05-13",
+      "source": "FERC eLibrary",
+      "url": "https://ferc.gov/"
+    },
+    {
+      "tag": "FERC",
+      "tag_class": "ferc",
+      "title": "Cube Hydro Carolinas Yadkin",
+      "date": "2026-05-06",
+      "source": "FERC eLibrary",
+      "url": "https://ferc.gov/"
+    },
+    {
+      "tag": "FERC",
+      "tag_class": "ferc",
+      "title": "Consolidated Water Power Company",
+      "date": "2026-04-24",
+      "source": "FERC eLibrary",
+      "url": "https://ferc.gov/"
+    },
+    {
+      "tag": "FERC",
+      "tag_class": "ferc",
+      "title": "Bonneville Power Administration",
+      "date": "2026-04-14",
+      "source": "FERC eLibrary",
+      "url": "https://ferc.gov/"
+    },
+    {
+      "tag": "CAISO",
+      "tag_class": "market",
+      "title": "ISO Markets and Settlements Training Workshop 1/28-30/20",
+      "date": "2019-11-12",
+      "source": "CAISO Notices",
+      "url": "https://www.caiso.com/documents/isomarkets-settlementstrainingworkshop1283020.html"
+    }
+  ],
   "archive": [
     {
       "issue": "ISSUE 08",
