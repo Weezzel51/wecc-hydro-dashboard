@@ -7,15 +7,13 @@ sources, writes a single JSON file consumed by the static dashboard.
 Design rules
 ────────────
 1. Graceful degradation: any source can fail without killing the run.
-   Failed sources log a warning and emit null/empty fields; dashboard
-   shows "—" for missing values.
 2. Primary sources only. No paywalled feeds. No scraping behind logins.
 3. One JSON output. Frontend reads /data/dashboard.json — that's it.
 4. Idempotent. Safe to re-run any time; output always reflects "now".
 
 Environment
 ───────────
-    EIA_API_KEY    Required for BPA mix + wholesale prices.
+    EIA_API_KEY    Required for BPA mix.
                    Free at https://www.eia.gov/opendata/register.php
                    Set as GitHub Actions secret.
 """
@@ -23,41 +21,50 @@ Environment
 import os
 import sys
 import json
+import re
 import datetime
+import urllib.parse
 from pathlib import Path
 from typing import Optional, Dict, List, Any
+from xml.etree import ElementTree as ET
 
 import requests
 
 # ── Config ────────────────────────────────────────────────────────────
-EIA_API_KEY = os.environ.get("EIA_API_KEY", "")
-OUT_PATH    = Path(__file__).resolve().parent.parent / "data" / "dashboard.json"
+EIA_API_KEY  = os.environ.get("EIA_API_KEY", "")
+OUT_PATH     = Path(__file__).resolve().parent.parent / "data" / "dashboard.json"
 ARCHIVE_PATH = Path(__file__).resolve().parent.parent / "data" / "archive.json"
-PT          = datetime.timezone(datetime.timedelta(hours=-7))  # PDT/PST shift in workflow
-HTTP_TIMEOUT = 20
+PT           = datetime.timezone(datetime.timedelta(hours=-7))
+HTTP_TIMEOUT = 30
+UA           = "WECC-Hydro-Brief/1.0 (https://wecchydrobrief.com)"
 
-# Basin roster. Each entry routes to a fetcher by `source`.
-# `id` is source-specific (HUC, CDEC region code, BC RFC region key).
+# Basin roster — 17 basins, north-to-south. Names MUST match the
+# `name` property in data/geo/basins.geojson so the map renders.
 BASINS: List[Dict[str, str]] = [
-    # ── BC Columbia headwaters (BC RFC) ──
+    # BC Columbia headwaters
     {"name": "Mica / Upper Columbia (BC)", "source": "bc",     "id": "UCOL"},
     {"name": "Kootenay (BC)",              "source": "bc",     "id": "KOOT"},
-    # ── PNW (NRCS SNOTEL) ──
-    {"name": "Upper Columbia (US)",        "source": "snotel", "id": "17020001"},
-    {"name": "Pend Oreille",               "source": "snotel", "id": "17010216"},
-    {"name": "Snake River",                "source": "snotel", "id": "17040201"},
-    {"name": "Clearwater",                 "source": "snotel", "id": "17060306"},
-    {"name": "Salmon",                     "source": "snotel", "id": "17060201"},
-    {"name": "Yakima",                     "source": "snotel", "id": "17030003"},
-    {"name": "Owyhee",                     "source": "snotel", "id": "17050106"},
-    # ── CAISO / Sierra (CDEC) ──
+    # PNW (Columbia + Snake)
+    {"name": "Upper Columbia (US)",        "source": "snotel", "id": "170200"},
+    {"name": "Pend Oreille",               "source": "snotel", "id": "170102"},
+    {"name": "Yakima",                     "source": "snotel", "id": "170300"},
+    {"name": "Clearwater",                 "source": "snotel", "id": "170603"},
+    {"name": "Salmon",                     "source": "snotel", "id": "170602"},
+    {"name": "Upper Snake",                "source": "snotel", "id": "170401"},
+    {"name": "Lower Snake",                "source": "snotel", "id": "170601"},
+    {"name": "Owyhee",                     "source": "snotel", "id": "170501"},
+    {"name": "Lower Columbia",             "source": "snotel", "id": "170800"},
+    # CAISO Sierra
     {"name": "Northern Sierra (Feather)",  "source": "cdec",   "id": "NSF"},
     {"name": "Central Sierra (American)",  "source": "cdec",   "id": "CSF"},
     {"name": "Southern Sierra (San Joaq.)","source": "cdec",   "id": "SSF"},
     {"name": "Tulare (Kings/Kern)",        "source": "cdec",   "id": "TLR"},
+    # Colorado (no SWE source feed; basin shows on map but stays "no data")
+    {"name": "Upper Colorado",             "source": "none",   "id": "UCOLO"},
+    {"name": "Lower Colorado",             "source": "none",   "id": "LCOLO"},
 ]
 
-# USACE NWD projects (lower Columbia / Snake mainstem).
+# USACE NWD projects to fetch discharge for.
 USACE_PROJECTS: List[Dict[str, str]] = [
     {"name": "Grand Coulee", "code": "GCL"},
     {"name": "Chief Joseph", "code": "CHJ"},
@@ -73,7 +80,6 @@ def _log(msg: str) -> None:
 
 
 def _safe(fn, label: str):
-    """Run a fetcher; catch and log any exception; return None on failure."""
     try:
         return fn()
     except Exception as e:
@@ -81,24 +87,29 @@ def _safe(fn, label: str):
         return None
 
 
+def _http_get(url: str, **kwargs) -> requests.Response:
+    headers = kwargs.pop("headers", {})
+    headers.setdefault("User-Agent", UA)
+    r = requests.get(url, headers=headers, timeout=HTTP_TIMEOUT, **kwargs)
+    r.raise_for_status()
+    return r
+
+
 # ══════════════════════════════════════════════════════════════════════
-#  TIER 1 — WORKING ENDPOINTS (EIA)
+#  TIER 1 — EIA-930 (working) + EIA ICE bulk XLS (new)
 # ══════════════════════════════════════════════════════════════════════
 
 def fetch_eia_bpa_mix() -> Optional[Dict[str, int]]:
     """
-    EIA-930 BPA balancing authority hourly generation by fuel type.
-    Averages the last 24h, rolls up to hydro / wind / thermal-and-other.
-
-    Endpoint: https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/
-    Docs:     https://www.eia.gov/opendata/documentation.php
+    EIA-930 BPA balancing-authority hourly generation by fuel type.
+    Averages the last 24h into hydro / wind / thermal-and-other.
     """
     if not EIA_API_KEY:
         _log("  ⚠ EIA_API_KEY unset — skipping BPA mix")
         return None
 
     end   = datetime.datetime.utcnow()
-    start = end - datetime.timedelta(days=2)  # buffer for late posts
+    start = end - datetime.timedelta(days=2)
     url   = "https://api.eia.gov/v2/electricity/rto/fuel-type-data/data/"
     params = {
         "api_key": EIA_API_KEY,
@@ -111,18 +122,13 @@ def fetch_eia_bpa_mix() -> Optional[Dict[str, int]]:
         "sort[0][direction]": "desc",
         "length": 5000,
     }
-    r = requests.get(url, params=params, timeout=HTTP_TIMEOUT)
-    r.raise_for_status()
-    rows = r.json().get("response", {}).get("data", [])
+    rows = _http_get(url, params=params).json().get("response", {}).get("data", [])
     if not rows:
         return None
 
-    # Group hours; take the 24 most-recent complete hours.
     by_hour: Dict[str, Dict[str, float]] = {}
     for row in rows:
-        h  = row.get("period")
-        ft = row.get("fueltype")
-        v  = row.get("value")
+        h, ft, v = row.get("period"), row.get("fueltype"), row.get("value")
         if h is None or ft is None or v is None:
             continue
         by_hour.setdefault(h, {})[ft] = float(v)
@@ -147,52 +153,117 @@ def fetch_eia_bpa_mix() -> Optional[Dict[str, int]]:
 
 def fetch_eia_midc_price() -> Optional[Dict[str, Any]]:
     """
-    Scrape Mid-C peak wholesale spot price from EIA's Today in Energy
-    daily prices page. Updates weekdays ~07:30-08:30 ET.
+    Download EIA's bulk ICE wholesale electricity XLS, parse Mid-C peak.
 
-    Source: https://www.eia.gov/todayinenergy/prices.php
-
-    Note: EIA's v2 API does not expose ICE hub prices, only via web pages
-    and bulk XLS downloads. This scrape is the simplest working path.
+    Source: https://www.eia.gov/electricity/wholesale/
+            The page links to ice_electric-YYYY-YYYY.xlsx (current year file).
+    Why this and not Today in Energy: bulk XLS is an authoritative republication
+    of ICE's daily indices under EIA's licensing agreement, includes peak +
+    off-peak + weighted-avg + volume, history back to 2001. Today in Energy
+    only shows the previous day's headline.
     """
-    from bs4 import BeautifulSoup
+    import openpyxl
 
-    url = "https://www.eia.gov/todayinenergy/prices.php"
-    headers = {"User-Agent": "WECC-Hydro-Brief/1.0 (https://wecchydrobrief.com)"}
-    r = requests.get(url, timeout=HTTP_TIMEOUT, headers=headers)
-    r.raise_for_status()
-
-    soup = BeautifulSoup(r.text, "html.parser")
-    midc_price = None
-
-    for row in soup.find_all("tr"):
-        cells = row.find_all("td")
-        if len(cells) < 2:
+    year = datetime.date.today().year
+    # The file is named for the year range it covers. Current convention:
+    # "ice_electric-2010-{year}.xlsx" — EIA expands the range each year.
+    candidates = [
+        f"https://www.eia.gov/electricity/wholesale/xls/ice_electric-2010-{year}.xlsx",
+        f"https://www.eia.gov/electricity/wholesale/xls/ice_electric-2010-{year - 1}.xlsx",
+    ]
+    xls_bytes = None
+    for url in candidates:
+        try:
+            r = _http_get(url)
+            xls_bytes = r.content
+            _log(f"  · fetched {url.rsplit('/', 1)[-1]} ({len(xls_bytes)//1024} KB)")
+            break
+        except requests.HTTPError:
             continue
-        row_text = " ".join(c.get_text(strip=True) for c in cells).lower()
-        if "mid" in row_text and ("columbia" in row_text or "mid-c" in row_text or "mid c" in row_text):
-            for cell in cells:
-                txt = cell.get_text(strip=True).replace("$", "").replace(",", "").strip()
+    if xls_bytes is None:
+        raise RuntimeError("EIA ICE bulk XLS not found at expected URLs")
+
+    import io
+    wb = openpyxl.load_workbook(io.BytesIO(xls_bytes), data_only=True, read_only=True)
+
+    # Sheet naming varies by year; find sheets whose name contains "Mid C"
+    # (the actual hub name in EIA's file is "Mid C Peak" / "Mid C Off-Peak").
+    peak_sheet = None
+    offp_sheet = None
+    for name in wb.sheetnames:
+        norm = name.lower().replace("-", " ").replace("  ", " ")
+        if "mid c" in norm and "peak" in norm and "off" not in norm:
+            peak_sheet = name
+        elif "mid c" in norm and "off" in norm:
+            offp_sheet = name
+    if not peak_sheet:
+        raise RuntimeError(f"No Mid-C peak sheet in {wb.sheetnames}")
+
+    def read_sheet(name):
+        """Returns list of (date, wtd_avg_price) tuples, newest last."""
+        ws = wb[name]
+        # Header row: identify columns. EIA layout: Trade Date, Delivery Start,
+        # Delivery End, High, Low, Wtd Avg Price $/MWh, Daily Volume MWh, # Trades.
+        header = None
+        out = []
+        for row in ws.iter_rows(values_only=True):
+            if header is None:
+                if row and isinstance(row[0], str) and "date" in row[0].lower():
+                    header = [str(c or "").lower().strip() for c in row]
+                continue
+            if not row or row[0] is None:
+                continue
+            d = row[0]
+            if isinstance(d, datetime.datetime):
+                d = d.date()
+            elif isinstance(d, str):
                 try:
-                    v = float(txt)
-                    if 5 < v < 500:  # sanity: typical Mid-C $/MWh range
-                        midc_price = v
-                        break
+                    d = datetime.date.fromisoformat(d[:10])
                 except ValueError:
                     continue
-            if midc_price:
-                break
+            # find wtd avg column
+            try:
+                wtd_idx = next(i for i, h in enumerate(header) if "wtd" in h and "avg" in h)
+            except StopIteration:
+                wtd_idx = 5  # fallback: typical EIA layout
+            try:
+                p = float(row[wtd_idx])
+            except (TypeError, ValueError):
+                continue
+            out.append((d, p))
+        return out
 
-    if midc_price is None:
-        _log("  ⚠ Mid-C row not found in EIA Today in Energy table")
-        return None
+    peak_series = read_sheet(peak_sheet)
+    offp_series = read_sheet(offp_sheet) if offp_sheet else []
 
-    _log(f"  ✓ Mid-C peak DA: ${midc_price:.2f}/MWh (EIA Today in Energy)")
+    if not peak_series:
+        raise RuntimeError("Peak series empty")
+
+    peak_series.sort()
+    if offp_series:
+        offp_series.sort()
+
+    latest_date, latest_price = peak_series[-1]
+    offp_latest = offp_series[-1][1] if offp_series else None
+
+    # 7-day WoW
+    week_ago = latest_date - datetime.timedelta(days=7)
+    prior = next((p for d, p in reversed(peak_series[:-1]) if d <= week_ago), None)
+    wow_pct = ((latest_price - prior) / prior * 100) if prior else None
+
+    # 30-day chart history
+    history = [
+        {"d": _fmt_short_date(d.isoformat()), "p": round(p, 2)}
+        for d, p in peak_series[-30:]
+    ]
+
+    _log(f"  ✓ Mid-C peak DA: ${latest_price:.2f}/MWh ({latest_date.isoformat()})")
     return {
-        "peak_da":    round(midc_price, 2),
-        "offpeak_da": None,
-        "wow_pct":    None,
-        "history":    [],  # 30-day history comes later via XLS bulk download
+        "peak_da":    round(latest_price, 2),
+        "offpeak_da": round(offp_latest, 2) if offp_latest is not None else None,
+        "wow_pct":    round(wow_pct, 1) if wow_pct is not None else None,
+        "history":    history,
+        "as_of":      latest_date.isoformat(),
     }
 
 
@@ -202,115 +273,194 @@ def _fmt_short_date(iso: str) -> str:
 
 
 # ══════════════════════════════════════════════════════════════════════
-#  TIER 2 — STUBS (real endpoints documented; fill in incrementally)
+#  TIER 2 STUBS (filled out in future sessions)
 # ══════════════════════════════════════════════════════════════════════
 
 def fetch_snotel_basin(huc: str) -> Optional[Dict[str, Any]]:
-    """
-    NRCS Air & Water Database (AWDB) — basin-level SWE % of median.
-
-    Endpoint: https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1/
-    Approach: Query basin-index station for HUC, element=WTEQ, duration=DAILY.
-              Compute current value, % of median, and 7d delta.
-
-    Return shape:
-        {"swe_in": float, "pct_median": int, "delta_7d": int}
-    """
-    # TODO: implement once basin→station mapping is confirmed.
-    # NRCS publishes a station catalog at wcc.sc.egov.usda.gov/reportGenerator.
+    """NRCS AWDB — basin SWE % of median. Stub."""
     return None
-
 
 def fetch_cdec_sierra(region_id: str) -> Optional[Dict[str, Any]]:
-    """
-    CA Data Exchange Center (CDEC) — Sierra snow region indices.
-
-    Endpoint: https://cdec.water.ca.gov/dynamicapp/req/JSONDataServlet
-    Sensors:  SWE = sensor 82 (snow water content, daily). Region keys:
-              NSF (Northern), CSF (Central), SSF (Southern), TLR (Tulare).
-
-    Return shape:
-        {"swe_in": float, "pct_median": int, "delta_7d": int}
-    """
+    """CDEC Sierra region SWE. Stub."""
     return None
-
 
 def fetch_bc_snow(region_id: str) -> Optional[Dict[str, Any]]:
-    """
-    BC River Forecast Centre — automated snow weather station network.
-
-    Source:   https://bcrfc.env.gov.bc.ca/data/asp/asplive.csv (live ASP data)
-              https://bcrfc.env.gov.bc.ca/bulletins/ (monthly bulletins)
-    Approach: Average % of normal across stations within UCOL or KOOT region.
-
-    Return shape:
-        {"swe_in": float, "pct_median": int, "delta_7d": int}
-    """
+    """BC RFC automated snow weather stations. Stub."""
     return None
-
 
 def fetch_nwrfc_wsf() -> Optional[Dict[str, Any]]:
-    """
-    NWRFC Apr–Sep water supply forecast at The Dalles (key Columbia metric).
-
-    Source:   https://www.nwrfc.noaa.gov/water_supply/ws_forecasts.php
-    Approach: Scrape the forecast table; pull TDA, latest issue date, MAF, % of normal.
-
-    Return shape:
-        {"site": "The Dalles", "forecast_maf": float,
-         "pct_normal": int, "delta_prior_maf": float}
-    """
+    """NWRFC Apr–Sep water supply forecast at The Dalles. Stub."""
     return None
-
 
 def fetch_usace_project(code: str) -> Optional[Dict[str, Any]]:
-    """
-    USACE NWD dataquery — project discharge and forebay.
-
-    Source:   https://www.nwd-wc.usace.army.mil/dd/common/dataquery/www/
-    Endpoint: ?query=[%22{code}.Discharge.Inst.5Minutes.0...%22]
-    Approach: Latest 5-min discharge in kcfs + forebay elevation in ft.
-
-    Return shape:
-        {"discharge_kcfs": int, "forebay_ft": float}
-    """
+    """USACE NWD dataquery — discharge + forebay. Stub."""
     return None
-
 
 def fetch_caiso_hydro() -> Optional[Dict[str, Any]]:
-    """
-    CAISO OASIS — system-wide hydro dispatch + SP15 DA.
-
-    Source:   http://oasis.caiso.com/oasisapi/SingleZip
-    Queries:  SLD_FCST (load), ENE_SLRS (hydro dispatch), PRC_LMP (SP15).
-    Note:     Returns zipped XML — parse with xml.etree.
-
-    Return shape:
-        {"hydro_mw": int, "hydro_share_pct": float,
-         "sp15_da": float, "history": [{"h": "HH", "mw": int}]}
-    """
+    """CAISO OASIS — hydro dispatch + SP15. Stub."""
     return None
 
 
-def fetch_ferc_hydro_filings() -> List[Dict[str, str]]:
+# ══════════════════════════════════════════════════════════════════════
+#  REGULATORY PULSE — FERC + CAISO + BPA (3 feeds, deduped, max 6 items)
+# ══════════════════════════════════════════════════════════════════════
+
+# Hydropower keywords for filtering noisy feeds. Matches case-insensitive.
+HYDRO_KEYWORDS = re.compile(
+    r"\b(hydro|hydropower|hydroelectric|pumped storage|psh|"
+    r"dam|reservoir|spillway|spill|columbia|snake|"
+    r"bpa|bonneville|edam|wem|weim|markets\+?|markets plus|"
+    r"ferc license|relicens|water power|"
+    r"colorado river|hoover|glen canyon|"
+    r"caiso|cal[ -]?iso|wecc)\b",
+    re.IGNORECASE
+)
+
+
+def fetch_ferc_filings(max_items: int = 5) -> List[Dict[str, str]]:
     """
-    FERC eLibrary — recent hydro/PSH docket filings.
-
-    Source:   https://elibrary.ferc.gov/eLibrary/search (RSS/Atom feed)
-    Filter:   Subcategory = "Hydropower" OR "Pumped Storage", last 14 days.
-
-    Return shape (list):
-        [{"tag": "FERC"|"MARKET"|"OPS", "tag_class": "ferc"|"market"|"ops",
-          "title": str, "date": "YYYY-MM-DD", "source": str}]
+    FERC eForms RSS — filter for hydropower-relevant filings.
+    Source: https://ecollection.ferc.gov/api/rssfeed
     """
-    return []
+    url = "https://ecollection.ferc.gov/api/rssfeed"
+    r = _http_get(url)
+    root = ET.fromstring(r.content)
+    items = []
+    # RSS 2.0: channel > item
+    for item in root.iter("item"):
+        title = (item.findtext("title") or "").strip()
+        if not HYDRO_KEYWORDS.search(title):
+            continue
+        link  = (item.findtext("link")  or "").strip()
+        pub   = (item.findtext("pubDate") or "").strip()
+        try:
+            dt = datetime.datetime.strptime(pub[:25], "%a, %d %b %Y %H:%M:%S")
+            date_iso = dt.date().isoformat()
+        except ValueError:
+            date_iso = ""
+        items.append({
+            "tag": "FERC", "tag_class": "ferc",
+            "title": title, "date": date_iso,
+            "source": "FERC eLibrary", "url": link
+        })
+        if len(items) >= max_items:
+            break
+    _log(f"  · FERC: {len(items)} hydropower-relevant items")
+    return items
 
+
+def fetch_caiso_notices(max_items: int = 5) -> List[Dict[str, str]]:
+    """
+    CAISO market notices — scrape the notices listing page.
+    Source: https://www.caiso.com/library/notices-iso-news-and-information
+    """
+    from bs4 import BeautifulSoup
+    url = "https://www.caiso.com/library/notices-iso-news-and-information"
+    r = _http_get(url)
+    soup = BeautifulSoup(r.text, "html.parser")
+    items = []
+    # CAISO notices page renders each notice as <article> or list rows;
+    # be permissive: any anchor inside a date-prefixed row.
+    for row in soup.select("article, li, tr"):
+        a = row.find("a", href=True)
+        if not a:
+            continue
+        title = a.get_text(strip=True)
+        if not title or len(title) < 12:
+            continue
+        if not HYDRO_KEYWORDS.search(title):
+            continue
+        href = a["href"]
+        if href.startswith("/"):
+            href = "https://www.caiso.com" + href
+        # Try to extract a date from the row text
+        text = row.get_text(" ", strip=True)
+        date_iso = ""
+        m = re.search(r"(\d{1,2}/\d{1,2}/\d{4})", text)
+        if m:
+            try:
+                date_iso = datetime.datetime.strptime(m.group(1), "%m/%d/%Y").date().isoformat()
+            except ValueError:
+                pass
+        items.append({
+            "tag": "CAISO", "tag_class": "market",
+            "title": title, "date": date_iso,
+            "source": "CAISO Notices", "url": href
+        })
+        if len(items) >= max_items:
+            break
+    _log(f"  · CAISO: {len(items)} hydropower-relevant items")
+    return items
+
+
+def fetch_bpa_news(max_items: int = 5) -> List[Dict[str, str]]:
+    """
+    BPA press releases — scrape the news releases listing page.
+    Source: https://www.bpa.gov/about/newsroom/news-releases
+    """
+    from bs4 import BeautifulSoup
+    url = "https://www.bpa.gov/about/newsroom/news-releases"
+    r = _http_get(url)
+    soup = BeautifulSoup(r.text, "html.parser")
+    items = []
+    for a in soup.find_all("a", href=True):
+        title = a.get_text(strip=True)
+        if not title or len(title) < 18:
+            continue
+        # BPA releases are prefixed "PR-NN-YY" — use as a filter signal too
+        is_release = bool(re.match(r"PR-\d{2}-\d{2}", title))
+        if not (is_release or HYDRO_KEYWORDS.search(title)):
+            continue
+        href = a["href"]
+        if href.startswith("/"):
+            href = "https://www.bpa.gov" + href
+        # BPA listing pages don't always show dates inline; leave blank
+        items.append({
+            "tag": "BPA", "tag_class": "ops",
+            "title": re.sub(r"^PR-\d{2}-\d{2}\s*", "", title),
+            "date": "",
+            "source": "BPA Newsroom", "url": href
+        })
+        if len(items) >= max_items:
+            break
+    _log(f"  · BPA: {len(items)} items")
+    return items
+
+
+def fetch_regulatory_pulse() -> List[Dict[str, str]]:
+    """
+    Pull from 3 feeds, dedupe by title, sort by date desc, cap at 6.
+    """
+    feeds = []
+    for label, fn in [
+        ("FERC",  fetch_ferc_filings),
+        ("CAISO", fetch_caiso_notices),
+        ("BPA",   fetch_bpa_news),
+    ]:
+        result = _safe(fn, label)
+        if result:
+            feeds.extend(result)
+
+    # Dedupe by lowercase title
+    seen = set()
+    deduped = []
+    for it in feeds:
+        key = it["title"].lower().strip()[:80]
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(it)
+
+    # Sort: items with dates first (newest), then dateless items
+    deduped.sort(key=lambda x: x.get("date") or "0000", reverse=True)
+    return deduped[:6]
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  ARCHIVE (hand-maintained)
+# ══════════════════════════════════════════════════════════════════════
 
 def load_archive() -> List[Dict[str, str]]:
-    """
-    Brief archive is hand-maintained in /data/archive.json so you control
-    what surfaces. Falls back to empty list if file missing.
-    """
     if ARCHIVE_PATH.exists():
         try:
             return json.loads(ARCHIVE_PATH.read_text())
@@ -337,28 +487,30 @@ def main() -> int:
         else: data = None
         if data:
             basins.append({"name": b["name"], **data})
-            _log(f"  ✓ {b['name']}: {data.get('pct_median')}% of median")
+            _log(f"  ✓ {b['name']}: {data.get('pct_median')}%")
 
-    # Tier-1 metrics
+    # Tier-1 markets
     _log("Markets:")
     bpa_mix = _safe(fetch_eia_bpa_mix,   "EIA-930 BPA")
-    midc    = _safe(fetch_eia_midc_price, "EIA Mid-C")
+    midc    = _safe(fetch_eia_midc_price, "EIA ICE bulk XLS Mid-C")
     wsf     = _safe(fetch_nwrfc_wsf,      "NWRFC WSF")
 
-    # Tier-2 metrics
+    # Ops
     _log("Ops:")
     usace_rows: List[Dict[str, Any]] = []
     for p in USACE_PROJECTS:
         data = _safe(lambda: fetch_usace_project(p["code"]), f"USACE {p['code']}")
         if data:
             usace_rows.append({"project": p["name"], **data})
+    caiso = _safe(fetch_caiso_hydro, "CAISO OASIS")
 
-    caiso   = _safe(fetch_caiso_hydro,         "CAISO OASIS")
-    reg     = _safe(fetch_ferc_hydro_filings,  "FERC eLibrary") or []
+    # Regulatory (3 feeds combined)
+    _log("Regulatory pulse:")
+    reg = _safe(fetch_regulatory_pulse, "Regulatory pulse") or []
+    _log(f"  ✓ {len(reg)} items after dedupe")
 
     archive = load_archive()
 
-    # Assemble
     output = {
         "meta": {
             "last_updated_pt": now.strftime("%Y-%m-%d %H:%M PT"),
@@ -366,7 +518,7 @@ def main() -> int:
             "sources_ok": [k for k, v in {
                 "bpa_mix": bpa_mix, "midc": midc, "wsf": wsf,
                 "caiso": caiso, "usace": bool(usace_rows),
-                "basins": bool(basins), "ferc": bool(reg),
+                "basins": bool(basins), "regulatory": bool(reg),
             }.items() if v],
         },
         "basins":     basins,
