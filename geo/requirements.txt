@@ -1,0 +1,6 @@
+requests>=2.31
+geopandas>=0.14
+shapely>=2.0
+rasterio>=1.3
+numpy>=1.26
+Pillow>=10.0
