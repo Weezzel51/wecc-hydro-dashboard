@@ -833,6 +833,21 @@ function applyLiveData(live) {
   return out;
 }
 
+// ─────────────────────────────────────────────────────────────
+// HTML ESCAPE HELPERS — used throughout render functions to prevent
+// content from feeds (which may contain &, <, >, ', ") from breaking
+// string-concatenated HTML and inline JS event handlers.
+// ─────────────────────────────────────────────────────────────
+function escAttr(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function escText(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
 // Format helper: value or em-dash if null/undefined.
 function fmt(v, prefix, suffix, decimals) {
   if (v == null) return '—';
@@ -886,35 +901,35 @@ function render(d) {
     `).join('');
   }
 
-  // Regulatory pulse
-  const escAttr = (s) => String(s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  const escText = (s) => String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Regulatory pulse (uses string concat + escapes to avoid template-literal injection)
   const newsList = document.getElementById('news-list');
   if (!d.regulatory.length) {
     newsList.innerHTML = '<li class="news-item" style="text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:11px;">No recent filings tracked</li>';
   } else {
-    newsList.innerHTML = d.regulatory.map(n => {
-      const hasUrl = n.url && String(n.url).length > 1;
-      const meta = [n.date, n.source].filter(Boolean).map(escText).join(' · ');
-      const inner =
+    newsList.innerHTML = d.regulatory.map(function (n) {
+      var hasUrl = n.url && String(n.url).length > 1;
+      var meta = [n.date, n.source].filter(Boolean).map(escText).join(' · ');
+      var inner =
         '<div><span class="news-tag ' + escAttr(n.tag_class) + '">' + escText(n.tag) + '</span></div>' +
         '<div class="news-title">' + escText(n.title) + '</div>' +
         '<div class="news-meta">' + meta + '</div>';
       if (hasUrl) {
-        return '<li class="news-item"><a href="' + escAttr(n.url) + '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;">' + inner + '</a></li>';
+        return '<li class="news-item"><a href="' + escAttr(n.url) +
+               '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;">' +
+               inner + '</a></li>';
       }
       return '<li class="news-item">' + inner + '</li>';
     }).join('');
   }
 
   // Archive
-  document.getElementById('archive-grid').innerHTML = d.archive.map(a => `
-    <a href="${a.url}" class="archive-card" target="_blank" rel="noopener">
-      <div class="issue">${a.issue}</div>
-      <div class="title">${a.title}</div>
-      <div class="date">${a.date}</div>
-    </a>
-  `).join('');
+  document.getElementById('archive-grid').innerHTML = d.archive.map(function (a) {
+    return '<a href="' + escAttr(a.url) + '" class="archive-card" target="_blank" rel="noopener">' +
+           '<div class="issue">' + escText(a.issue) + '</div>' +
+           '<div class="title">' + escText(a.title) + '</div>' +
+           '<div class="date">' + escText(a.date) + '</div>' +
+           '</a>';
+  }).join('');
 
   // Charts
   if (d.midc.history && d.midc.history.length) renderMidCChart(d.midc.history);
@@ -1042,50 +1057,52 @@ function renderBasinMap(basins) {
   }
 
   // 4. Basin polygons
-  geoBasins.features.forEach(f => {
-    const name = f.properties.name;
-    const data = currentBasinData[name];
-    const pct  = data ? data.pct_median : null;
-    const d    = PATH(f);
+  geoBasins.features.forEach(function (f) {
+    var name = f.properties.name;
+    var data = currentBasinData[name];
+    var pct  = data ? data.pct_median : null;
+    var d    = PATH(f);
     if (!d) return;
-    svg += `<path class="basin-shape" d="${d}"
-              fill="${basinFill(pct)}"
-              fill-opacity="0.65"
-              data-name="${name}"
-              onmousemove="showBasinTooltip(event, '${name.replace(/'/g, "\\'")}')"
-              onmouseleave="hideBasinTooltip()"
-              onclick="openBasinDetail('${name.replace(/'/g, "\\'")}')"
-            />`;
+    // Encode name for JS string literal in inline handlers — escape quotes/backslashes
+    var jsName = String(name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    svg += '<path class="basin-shape" d="' + d + '"' +
+           ' fill="' + basinFill(pct) + '" fill-opacity="0.65"' +
+           ' data-name="' + escAttr(name) + '"' +
+           " onmousemove=\"showBasinTooltip(event, '" + jsName + "')\"" +
+           ' onmouseleave="hideBasinTooltip()"' +
+           " onclick=\"openBasinDetail('" + jsName + "')\"" +
+           '/>';
   });
 
-  // 5. Basin labels (over polygons, with stroke halo for legibility)
-  geoBasins.features.forEach(f => {
-    const [cx, cy] = projectedCentroid(f);
-    if (isNaN(cx) || isNaN(cy)) return;
-    // Truncate long names for label
-    const name = f.properties.name;
-    const short = name.split(' ')[0].length > 9
+  // 5. Basin labels
+  geoBasins.features.forEach(function (f) {
+    var c = projectedCentroid(f);
+    if (isNaN(c[0]) || isNaN(c[1])) return;
+    var name = f.properties.name;
+    var short = name.split(' ')[0].length > 9
       ? name.split(' ')[0]
-      : (name.includes('(') ? name.split('(')[0].trim() : name);
-    svg += `<text class="basin-label" x="${cx}" y="${cy}">${short}</text>`;
+      : (name.indexOf('(') >= 0 ? name.split('(')[0].trim() : name);
+    svg += '<text class="basin-label" x="' + c[0] + '" y="' + c[1] + '">' + escText(short) + '</text>';
   });
 
-  // 6. Dams (gold dots + labels, on top)
+  // 6. Dams
   if (geoDams && geoDams.features) {
-    geoDams.features.forEach(f => {
-      const [x, y] = PROJECTION(f.geometry.coordinates);
-      if (isNaN(x) || isNaN(y)) return;
-      const anchor = f.properties.anchor || 'left';
-      const labelX = anchor === 'right' ? x + 10 : x - 10;
-      const textAnchor = anchor === 'right' ? 'start' : 'end';
-      const name = f.properties.name;
-      const meta = (f.properties.meta || '').replace(/'/g, "\\'");
-      svg += `<circle class="dam-marker" cx="${x}" cy="${y}" r="4.5"
-                fill="#c9a961" stroke="#0a0c14" stroke-width="1.5"
-                onmouseenter="showDamTooltip(event, '${name}', '${meta}')"
-                onmouseleave="hideBasinTooltip()"
-              />`;
-      svg += `<text class="dam-label" x="${labelX}" y="${y + 3}" text-anchor="${textAnchor}">${name}</text>`;
+    geoDams.features.forEach(function (f) {
+      var p = PROJECTION(f.geometry.coordinates);
+      if (isNaN(p[0]) || isNaN(p[1])) return;
+      var anchor = f.properties.anchor || 'left';
+      var labelX = anchor === 'right' ? p[0] + 10 : p[0] - 10;
+      var textAnchor = anchor === 'right' ? 'start' : 'end';
+      var name = f.properties.name;
+      var meta = f.properties.meta || '';
+      var jsName = String(name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      var jsMeta = String(meta).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      svg += '<circle class="dam-marker" cx="' + p[0] + '" cy="' + p[1] + '" r="4.5"' +
+             ' fill="#c9a961" stroke="#0a0c14" stroke-width="1.5"' +
+             " onmouseenter=\"showDamTooltip(event, '" + jsName + "', '" + jsMeta + "')\"" +
+             ' onmouseleave="hideBasinTooltip()"/>';
+      svg += '<text class="dam-label" x="' + labelX + '" y="' + (p[1] + 3) +
+             '" text-anchor="' + textAnchor + '">' + escText(name) + '</text>';
     });
   }
 
