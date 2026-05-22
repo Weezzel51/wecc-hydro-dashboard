@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-05-21 09:15 PT",
-    "next_update_pt": "2026-05-22 09:15 PT",
+    "last_updated_pt": "2026-05-21 19:58 PT",
+    "next_update_pt": "2026-05-22 19:58 PT",
     "sources_ok": [
       "bpa_mix"
     ]
@@ -22,25 +22,25 @@
       "issue": "ISSUE 08",
       "title": "EDAM go-live: PacifiCorp's first week and the COI basis question",
       "date": "May 11, 2026",
-      "url": "https://damdoc.substack.com/"
+      "url": "damdoc.substack.com"
     },
     {
       "issue": "ISSUE 07",
       "title": "17% YoY PNW hydro growth meets 12% Oregon snowpack \u2014 both true",
       "date": "May 4, 2026",
-      "url": "https://damdoc.substack.com/"
+      "url": "damdoc.substack.com"
     },
     {
       "issue": "ISSUE 06",
       "title": "FERC rescinds WECC soft cap: what changes for Mid-C scarcity hours",
       "date": "Apr 27, 2026",
-      "url": "https://damdoc.substack.com/"
+      "url": "damdoc.substack.com"
     },
     {
       "issue": "ISSUE 05",
       "title": "BC Treaty water timing and the Mid-C basis through August",
       "date": "Apr 20, 2026",
-      "url": "https://damdoc.substack.com/"
+      "url": "damdoc.substack.com"
     }
   ]
 }
