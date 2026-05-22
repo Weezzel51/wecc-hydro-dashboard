@@ -11,7 +11,6 @@
     --bg: #0f1117;
     --bg-elevated: #161824;
     --surface: #1c1f2e;
-    --surface-hover: #232639;
     --border: #2a2d3e;
     --border-strong: #3a3e54;
     --text: #e8e9ed;
@@ -28,559 +27,118 @@
     --mono: 'SF Mono', Menlo, Consolas, monospace;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 14px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 
-  /* Header */
-  .masthead {
-    border-bottom: 1px solid var(--border);
-    background: linear-gradient(180deg, #15172180 0%, var(--bg) 100%);
-    padding: 28px 32px 24px;
-  }
-  .masthead-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 24px;
-    flex-wrap: wrap;
-  }
-  .brand-block .eyebrow {
-    font-family: var(--sans);
-    font-size: 10px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 6px;
-  }
-  .brand-block h1 {
-    font-family: var(--serif);
-    font-size: 28px;
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    margin-bottom: 4px;
-  }
-  .brand-block .tagline {
-    font-family: var(--serif);
-    font-style: italic;
-    color: var(--text-dim);
-    font-size: 14px;
-  }
-  .status-block {
-    text-align: right;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    line-height: 1.7;
-  }
-  .status-block .pulse {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--green);
-    margin-right: 6px;
-    animation: pulse 2.5s infinite;
-    vertical-align: middle;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.85); }
-  }
+  .masthead { border-bottom: 1px solid var(--border); background: linear-gradient(180deg, #15172180 0%, var(--bg) 100%); padding: 28px 32px 24px; }
+  .masthead-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+  .brand-block .eyebrow { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  .brand-block h1 { font-family: var(--serif); font-size: 28px; font-weight: 400; letter-spacing: -0.01em; margin-bottom: 4px; }
+  .brand-block .tagline { font-family: var(--serif); font-style: italic; color: var(--text-dim); font-size: 14px; }
+  .status-block { text-align: right; font-family: var(--mono); font-size: 11px; color: var(--text-dim); line-height: 1.7; }
+  .status-block .pulse { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: pulse 2.5s infinite; vertical-align: middle; }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
   .status-block .timestamp { color: var(--text); font-weight: 500; }
-  .gold-rule {
-    height: 1px;
-    background: linear-gradient(90deg, var(--gold) 0%, transparent 60%);
-    margin-top: 18px;
-  }
+  .gold-rule { height: 1px; background: linear-gradient(90deg, var(--gold) 0%, transparent 60%); margin-top: 18px; }
 
-  /* Layout */
   .container { padding: 24px 32px 48px; max-width: 1600px; margin: 0 auto; }
-  .grid-tier-1 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
-  }
-  .grid-tier-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
-  }
-  @media (max-width: 900px) {
-    .grid-tier-1, .grid-tier-2 { grid-template-columns: 1fr; }
-    .masthead, .container { padding-left: 18px; padding-right: 18px; }
-    .brand-block h1 { font-size: 22px; }
-  }
+  .grid-tier-1 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .grid-tier-2 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  @media (max-width: 900px) { .grid-tier-1, .grid-tier-2 { grid-template-columns: 1fr; } .masthead, .container { padding-left: 18px; padding-right: 18px; } .brand-block h1 { font-size: 22px; } }
 
-  /* Panel */
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .panel-header {
-    padding: 14px 18px 12px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .panel-title {
-    font-family: var(--sans);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--text);
-  }
-  .panel-source {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-faint);
-    letter-spacing: 0.04em;
-  }
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+  .panel-header { padding: 14px 18px 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .panel-title { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text); }
+  .panel-source { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.04em; }
   .panel-body { padding: 20px 18px; }
 
-  /* Headline metric */
-  .headline {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 6px;
-  }
-  .headline .value {
-    font-family: var(--serif);
-    font-size: 44px;
-    font-weight: 400;
-    letter-spacing: -0.02em;
-    color: var(--text);
-    line-height: 1;
-  }
-  .headline .unit {
-    font-family: var(--sans);
-    font-size: 14px;
-    color: var(--text-dim);
-    font-weight: 500;
-  }
-  .headline-sub {
-    font-size: 12px;
-    color: var(--text-dim);
-    margin-bottom: 18px;
-  }
-  .delta {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-family: var(--mono);
-    font-size: 11px;
-    margin-left: 8px;
-  }
-  .delta.up { background: rgba(93, 185, 116, 0.12); color: var(--green); }
-  .delta.down { background: rgba(212, 96, 74, 0.12); color: var(--red); }
-  .delta.flat { background: rgba(148, 152, 168, 0.12); color: var(--text-dim); }
+  .headline { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
+  .headline .value { font-family: var(--serif); font-size: 44px; font-weight: 400; letter-spacing: -0.02em; color: var(--text); line-height: 1; }
+  .headline .unit { font-size: 14px; color: var(--text-dim); font-weight: 500; }
+  .headline-sub { font-size: 12px; color: var(--text-dim); margin-bottom: 18px; }
 
-  /* Basin table */
-  .basin-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  .basin-table th {
-    text-align: left;
-    font-family: var(--sans);
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-faint);
-    padding: 8px 6px;
-    border-bottom: 1px solid var(--border);
-  }
+  .basin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .basin-table th { text-align: left; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); padding: 8px 6px; border-bottom: 1px solid var(--border); }
   .basin-table th.num, .basin-table td.num { text-align: right; font-family: var(--mono); }
-  .basin-table td {
-    padding: 10px 6px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-  }
+  .basin-table td { padding: 10px 6px; border-bottom: 1px solid var(--border); color: var(--text); }
   .basin-table tr:last-child td { border-bottom: none; }
-  .basin-table .bar-cell { width: 35%; }
-  .bar-track {
-    background: var(--bg-elevated);
-    height: 6px;
-    border-radius: 3px;
-    overflow: hidden;
-    position: relative;
-  }
-  .bar-track::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    bottom: -2px;
-    left: 100%;
-    width: 1px;
-    background: var(--gold-dim);
-    transform: translateX(-100%);
-    opacity: 0.6;
-  }
-  .bar-fill { height: 100%; border-radius: 3px; }
-  .bar-fill.low { background: var(--red); }
-  .bar-fill.mid { background: var(--amber); }
-  .bar-fill.normal { background: var(--green); }
-  .bar-fill.high { background: var(--blue); }
 
-  /* Chart container */
   .chart-wrap { position: relative; height: 220px; margin-top: 8px; }
   .chart-wrap.small { height: 140px; }
-  .chart-wrap.donut { height: 180px; }
 
-  /* Stat row */
-  .stat-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 18px;
-  }
-  .stat {
-    border-left: 2px solid var(--border-strong);
-    padding-left: 10px;
-  }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+  .stat { border-left: 2px solid var(--border-strong); padding-left: 10px; }
   .stat.gold { border-color: var(--gold); }
-  .stat .label {
-    font-size: 10px;
-    color: var(--text-faint);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 3px;
-  }
-  .stat .num {
-    font-family: var(--mono);
-    font-size: 16px;
-    color: var(--text);
-  }
+  .stat .label { font-size: 10px; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+  .stat .num { font-family: var(--mono); font-size: 16px; color: var(--text); }
 
-  /* News / regulatory pulse list */
   .news-list { list-style: none; }
-  .news-item {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border);
-  }
+  .news-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
   .news-item:last-child { border-bottom: none; }
-  .news-tag {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 0.1em;
-    padding: 2px 6px;
-    border-radius: 2px;
-    margin-right: 8px;
-    vertical-align: middle;
-  }
+  .news-item a { text-decoration: none; color: inherit; display: block; transition: color 0.15s; }
+  .news-item a:hover .news-title { color: var(--gold); }
+  .news-tag { display: inline-block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; padding: 2px 6px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
   .news-tag.ferc { background: rgba(74, 144, 201, 0.15); color: var(--blue); }
   .news-tag.market { background: rgba(201, 169, 97, 0.15); color: var(--gold); }
   .news-tag.ops { background: rgba(93, 185, 116, 0.15); color: var(--green); }
-  .news-title {
-    font-size: 13px;
-    color: var(--text);
-    line-height: 1.45;
-    margin-bottom: 4px;
-  }
-  .news-item a:hover .news-title { color: var(--gold); }
-  .news-item a { transition: color 0.15s; }
-  .news-meta {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-faint);
-  }
+  .news-title { font-size: 13px; color: var(--text); line-height: 1.45; margin-bottom: 4px; }
+  .news-meta { font-family: var(--mono); font-size: 10px; color: var(--text-faint); }
 
-  /* Archive cards */
-  .archive {
-    margin-top: 32px;
-    padding-top: 24px;
-    border-top: 1px solid var(--border);
-  }
-  .archive-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 16px;
-  }
-  .archive-header h2 {
-    font-family: var(--serif);
-    font-size: 20px;
-    font-weight: 400;
-  }
-  .archive-link {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--gold);
-    text-decoration: none;
-    letter-spacing: 0.05em;
-  }
+  .archive { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
+  .archive-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
+  .archive-header h2 { font-family: var(--serif); font-size: 20px; font-weight: 400; }
+  .archive-link { font-family: var(--mono); font-size: 11px; color: var(--gold); text-decoration: none; letter-spacing: 0.05em; }
   .archive-link:hover { color: var(--text); }
-  .archive-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-  }
-  .archive-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    padding: 16px;
-    border-radius: 4px;
-    transition: border-color 0.15s;
-    text-decoration: none;
-    color: inherit;
-    display: block;
-  }
+  .archive-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .archive-card { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 4px; transition: border-color 0.15s; text-decoration: none; color: inherit; display: block; }
   .archive-card:hover { border-color: var(--gold-dim); }
-  .archive-card .issue {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--gold);
-    letter-spacing: 0.1em;
-    margin-bottom: 8px;
-  }
-  .archive-card .title {
-    font-family: var(--serif);
-    font-size: 15px;
-    line-height: 1.35;
-    margin-bottom: 10px;
-  }
-  .archive-card .date {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-faint);
-  }
+  .archive-card .issue { font-family: var(--mono); font-size: 10px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 8px; }
+  .archive-card .title { font-family: var(--serif); font-size: 15px; line-height: 1.35; margin-bottom: 10px; }
+  .archive-card .date { font-family: var(--mono); font-size: 10px; color: var(--text-faint); }
 
-  /* Footer */
-  footer {
-    margin-top: 48px;
-    padding: 24px 32px;
-    border-top: 1px solid var(--border);
-    text-align: center;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text-faint);
-    letter-spacing: 0.08em;
-  }
+  footer { margin-top: 48px; padding: 24px 32px; border-top: 1px solid var(--border); text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; }
   footer .footer-brand { color: var(--gold); }
-  footer .disclaimer {
-    margin-top: 8px;
-    font-size: 10px;
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.6;
-  }
+  footer .disclaimer { margin-top: 8px; font-size: 10px; max-width: 720px; margin-left: auto; margin-right: auto; line-height: 1.6; }
 
-  /* Loading state */
-  .loading { color: var(--text-faint); font-family: var(--mono); font-size: 11px; }
-
-  /* WECC Basin Map */
-  .map-panel-wide { grid-column: 1 / -1; }
-  .map-wrap {
-    position: relative;
-    width: 100%;
-    background: #0a0c14;
-    border-radius: 4px;
-    overflow: hidden;
-  }
+  /* ── MAP ── */
+  .map-wrap { position: relative; width: 100%; background: #0a0c14; border-radius: 4px; overflow: hidden; }
   .map-wrap svg { display: block; width: 100%; height: auto; }
-  .basin-shape {
-    cursor: pointer;
-    transition: filter 0.15s, stroke-width 0.15s;
-    stroke: #0a0c14;
-    stroke-width: 1.5;
-  }
-  .basin-shape:hover {
-    filter: brightness(1.35);
-    stroke: var(--gold);
-    stroke-width: 2;
-  }
-  .basin-shape.selected {
-    stroke: var(--gold);
-    stroke-width: 2.5;
-    filter: brightness(1.25);
-  }
-  .river-line {
-    fill: none;
-    stroke: #4a6a8a;
-    stroke-width: 1.2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: 0.75;
-    pointer-events: none;
-  }
-  .river-line.major {
-    stroke: #6a90b8;
-    stroke-width: 1.8;
-    opacity: 0.9;
-  }
-  .state-line {
-    fill: none;
-    stroke: #2a2d3e;
-    stroke-width: 0.8;
-    stroke-dasharray: 3 3;
-    pointer-events: none;
-  }
-  .country-line {
-    fill: none;
-    stroke: #4a4e62;
-    stroke-width: 1.2;
-    stroke-dasharray: 5 3;
-    pointer-events: none;
-  }
-  .dam-marker {
-    cursor: pointer;
-    transition: r 0.15s;
-  }
+  .basin-shape { cursor: pointer; transition: filter 0.15s, stroke-width 0.15s; stroke: #0a0c14; stroke-width: 1.5; }
+  .basin-shape:hover { filter: brightness(1.35); stroke: var(--gold); stroke-width: 2; }
+  .basin-shape.selected { stroke: var(--gold); stroke-width: 2.5; filter: brightness(1.25); }
+  .river-line { fill: none; stroke: #4a6a8a; stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; opacity: 0.75; pointer-events: none; }
+  .river-line.major { stroke: #6a90b8; stroke-width: 1.8; opacity: 0.9; }
+  .dam-marker { cursor: pointer; transition: r 0.15s; }
   .dam-marker:hover { r: 6; }
-  .dam-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    fill: var(--text-dim);
-    letter-spacing: 0.04em;
-    pointer-events: none;
-  }
-  .basin-label {
-    font-family: var(--sans);
-    font-size: 10px;
-    font-weight: 600;
-    fill: var(--text);
-    text-anchor: middle;
-    pointer-events: none;
-    paint-order: stroke;
-    stroke: #0a0c14;
-    stroke-width: 3;
-    stroke-linejoin: round;
-  }
-  .map-tooltip {
-    position: absolute;
-    background: rgba(28, 31, 46, 0.97);
-    border: 1px solid var(--border-strong);
-    border-radius: 3px;
-    padding: 8px 12px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--text);
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.1s;
-    z-index: 10;
-    min-width: 180px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  }
+  .dam-label { font-family: var(--mono); font-size: 9px; fill: var(--text-dim); letter-spacing: 0.04em; pointer-events: none; }
+  .basin-label { font-size: 10px; font-weight: 600; fill: var(--text); text-anchor: middle; pointer-events: none; paint-order: stroke; stroke: #0a0c14; stroke-width: 3; stroke-linejoin: round; }
+  .map-tooltip { position: absolute; background: rgba(28, 31, 46, 0.97); border: 1px solid var(--border-strong); border-radius: 3px; padding: 8px 12px; font-family: var(--mono); font-size: 11px; color: var(--text); pointer-events: none; opacity: 0; transition: opacity 0.1s; z-index: 10; min-width: 180px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
   .map-tooltip.visible { opacity: 1; }
-  .map-tooltip .tt-name {
-    font-family: var(--sans);
-    font-weight: 600;
-    color: var(--gold);
-    margin-bottom: 4px;
-    font-size: 12px;
-  }
-  .map-tooltip .tt-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    color: var(--text-dim);
-  }
+  .map-tooltip .tt-name { font-weight: 600; color: var(--gold); margin-bottom: 4px; font-size: 12px; }
+  .map-tooltip .tt-row { display: flex; justify-content: space-between; gap: 16px; color: var(--text-dim); }
   .map-tooltip .tt-row strong { color: var(--text); font-weight: 500; }
-  .map-legend {
-    display: flex;
-    gap: 16px;
-    padding: 10px 16px 12px;
-    border-top: 1px solid var(--border);
-    flex-wrap: wrap;
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 0.04em;
-  }
+  .map-legend { display: flex; gap: 16px; padding: 10px 16px 12px; border-top: 1px solid var(--border); flex-wrap: wrap; font-family: var(--mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.04em; }
   .legend-item { display: flex; align-items: center; gap: 6px; }
-  .legend-swatch {
-    width: 14px;
-    height: 8px;
-    border-radius: 2px;
-  }
-  .legend-swatch.low    { background: var(--red); }
-  .legend-swatch.mid    { background: var(--amber); }
+  .legend-swatch { width: 14px; height: 8px; border-radius: 2px; }
+  .legend-swatch.low { background: var(--red); }
+  .legend-swatch.mid { background: var(--amber); }
   .legend-swatch.normal { background: var(--green); }
-  .legend-swatch.high   { background: var(--blue); }
+  .legend-swatch.high { background: var(--blue); }
   .legend-swatch.nodata { background: #2a2d3e; }
-  .legend-divider {
-    width: 1px;
-    background: var(--border);
-    margin: 0 4px;
-  }
-  .legend-dam {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--gold);
-    border: 1px solid var(--gold-dim);
-  }
+  .legend-divider { width: 1px; background: var(--border); margin: 0 4px; }
+  .legend-dam { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); border: 1px solid var(--gold-dim); }
 
-  /* Detail drawer (opens on basin click) */
-  .basin-detail {
-    background: var(--bg-elevated);
-    border-top: 1px solid var(--border);
-    padding: 18px 20px;
-    display: none;
-  }
+  .basin-detail { background: var(--bg-elevated); border-top: 1px solid var(--border); padding: 18px 20px; display: none; }
   .basin-detail.open { display: block; }
-  .basin-detail .detail-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 12px;
-  }
-  .basin-detail h3 {
-    font-family: var(--serif);
-    font-size: 18px;
-    font-weight: 400;
-    color: var(--text);
-  }
-  .basin-detail .close-btn {
-    background: none;
-    border: none;
-    color: var(--text-faint);
-    cursor: pointer;
-    font-family: var(--mono);
-    font-size: 11px;
-    letter-spacing: 0.1em;
-  }
+  .basin-detail .detail-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .basin-detail h3 { font-family: var(--serif); font-size: 18px; font-weight: 400; color: var(--text); }
+  .basin-detail .close-btn { background: none; border: none; color: var(--text-faint); cursor: pointer; font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; }
   .basin-detail .close-btn:hover { color: var(--gold); }
-  .detail-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 14px;
-  }
-  .detail-stat {
-    border-left: 2px solid var(--border-strong);
-    padding-left: 10px;
-  }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+  .detail-stat { border-left: 2px solid var(--border-strong); padding-left: 10px; }
   .detail-stat.gold { border-color: var(--gold); }
-  .detail-stat .label {
-    font-size: 10px;
-    color: var(--text-faint);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-  .detail-stat .num {
-    font-family: var(--mono);
-    font-size: 18px;
-    color: var(--text);
-  }
-  .detail-stat .num.up   { color: var(--green); }
+  .detail-stat .label { font-size: 10px; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+  .detail-stat .num { font-family: var(--mono); font-size: 18px; color: var(--text); }
+  .detail-stat .num.up { color: var(--green); }
   .detail-stat .num.down { color: var(--red); }
 </style>
 </head>
@@ -604,15 +162,13 @@
 
 <main class="container">
 
-  <!-- TIER 1: WECC Basin Map (full width) -->
   <section style="display:grid;grid-template-columns:1fr;gap:20px;margin-bottom:20px;">
-    <div class="panel map-panel-wide">
+    <div class="panel">
       <div class="panel-header">
         <div class="panel-title">WECC Basin Water Conditions</div>
         <div class="panel-source">SNOTEL · NWRFC · CDEC · BC RFC</div>
       </div>
       <div class="map-wrap" id="map-wrap">
-        <!-- SVG injected by JS -->
         <div class="map-tooltip" id="map-tooltip"></div>
       </div>
       <div class="map-legend">
@@ -634,46 +190,24 @@
     </div>
   </section>
 
-  <!-- TIER 2: Mid-C Market + ops panels -->
   <section class="grid-tier-2">
-
-    <!-- Mid-C Market Panel -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">Mid-Columbia Power Market</div>
         <div class="panel-source">ICE EOD · EIA-930</div>
       </div>
       <div class="panel-body">
-        <div class="headline">
-          <span class="value" id="midc-value">—</span>
-          <span class="unit">/MWh · Mid-C peak DA</span>
-        </div>
-        <div class="headline-sub" id="midc-sub">
-          ICE EOD price pending
-        </div>
-
+        <div class="headline"><span class="value" id="midc-value">—</span><span class="unit">/MWh · Mid-C peak DA</span></div>
+        <div class="headline-sub" id="midc-sub">ICE EOD price pending</div>
         <div class="stat-row">
-          <div class="stat gold">
-            <div class="label">BPA Hydro %</div>
-            <div class="num" id="bpa-hydro-pct">—</div>
-          </div>
-          <div class="stat">
-            <div class="label">Wind %</div>
-            <div class="num" id="bpa-wind-pct">—</div>
-          </div>
-          <div class="stat">
-            <div class="label">Thermal %</div>
-            <div class="num" id="bpa-therm-pct">—</div>
-          </div>
+          <div class="stat gold"><div class="label">BPA Hydro %</div><div class="num" id="bpa-hydro-pct">—</div></div>
+          <div class="stat"><div class="label">Wind %</div><div class="num" id="bpa-wind-pct">—</div></div>
+          <div class="stat"><div class="label">Thermal %</div><div class="num" id="bpa-therm-pct">—</div></div>
         </div>
-
-        <div class="chart-wrap">
-          <canvas id="midc-chart"></canvas>
-        </div>
+        <div class="chart-wrap"><canvas id="midc-chart"></canvas></div>
       </div>
     </div>
 
-    <!-- USACE Discharge -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">USACE Project Discharge</div>
@@ -681,86 +215,54 @@
       </div>
       <div class="panel-body">
         <table class="basin-table">
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th class="num">Discharge</th>
-              <th class="num">Forebay</th>
-            </tr>
-          </thead>
-          <tbody id="usace-tbody">
-            <!-- populated by JS -->
-          </tbody>
+          <thead><tr><th>Project</th><th class="num">Discharge</th><th class="num">Forebay</th></tr></thead>
+          <tbody id="usace-tbody"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- CAISO Hydro -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">CAISO Hydro Snapshot</div>
         <div class="panel-source">CAISO OASIS</div>
       </div>
       <div class="panel-body">
-        <div class="headline">
-          <span class="value" id="caiso-hydro-mw">—</span>
-          <span class="unit">MW</span>
-        </div>
-        <div class="headline-sub" id="caiso-sub">
-          OASIS feed pending
-        </div>
-        <div class="chart-wrap small">
-          <canvas id="caiso-chart"></canvas>
-        </div>
+        <div class="headline"><span class="value" id="caiso-hydro-mw">—</span><span class="unit">MW</span></div>
+        <div class="headline-sub" id="caiso-sub">OASIS feed pending</div>
+        <div class="chart-wrap small"><canvas id="caiso-chart"></canvas></div>
       </div>
     </div>
-
   </section>
 
-  <!-- TIER 3: Regulatory pulse + WSF summary -->
   <section class="grid-tier-1">
-
-    <!-- WSF summary card -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">Columbia Water Supply Forecast</div>
         <div class="panel-source">NWRFC</div>
       </div>
       <div class="panel-body">
-        <div class="headline">
-          <span class="value" id="wsf-value">—</span>
-          <span class="unit">% of normal · Apr–Sep WSF, The Dalles</span>
-        </div>
-        <div class="headline-sub" id="wsf-sub">
-          NWRFC forecast pending
-        </div>
+        <div class="headline"><span class="value" id="wsf-value">—</span><span class="unit">% of normal · Apr–Sep WSF, The Dalles</span></div>
+        <div class="headline-sub" id="wsf-sub">NWRFC forecast pending</div>
       </div>
     </div>
 
-    <!-- Regulatory Pulse -->
     <div class="panel">
       <div class="panel-header">
         <div class="panel-title">Regulatory Pulse</div>
-        <div class="panel-source">FERC · CAISO</div>
+        <div class="panel-source">FERC · CAISO · BPA</div>
       </div>
       <div class="panel-body">
-        <ul class="news-list" id="news-list">
-          <!-- populated by JS -->
-        </ul>
+        <ul class="news-list" id="news-list"></ul>
       </div>
     </div>
-
   </section>
 
-  <!-- Brief Archive -->
   <section class="archive">
     <div class="archive-header">
       <h2>Recent Briefs</h2>
-      <a href="https://damdoc.substack.com/" class="archive-link" id="substack-link" target="_blank" rel="noopener">VIEW ALL ON SUBSTACK →</a>
+      <a href="https://damdoc.substack.com/" class="archive-link" target="_blank" rel="noopener">VIEW ALL ON SUBSTACK →</a>
     </div>
-    <div class="archive-grid" id="archive-grid">
-      <!-- populated by JS -->
-    </div>
+    <div class="archive-grid" id="archive-grid"></div>
   </section>
 
 </main>
@@ -775,18 +277,11 @@
 </footer>
 
 <script>
-// ─────────────────────────────────────────────────────────────
-// DATA LAYER
-// Live JSON is written daily by GitHub Actions to /data/dashboard.json.
-// Frontend fetches it, falls back to mock if the file is missing,
-// and shows "—" for any field the fetcher hasn't populated yet.
-// ─────────────────────────────────────────────────────────────
+"use strict";
 
-const MOCK_DATA = {
-  meta: {
-    last_updated_pt: "loading…",
-    next_update_pt:  "—"
-  },
+// ─── Mock fallback (used when /data/dashboard.json is unavailable) ───
+var MOCK_DATA = {
+  meta: { last_updated_pt: "loading…", next_update_pt: "—" },
   basins: [],
   wsf: { site: "The Dalles", pct_normal: null, forecast_maf: null, delta_prior_maf: null },
   midc: { peak_da: null, offpeak_da: null, wow_pct: null, history: [] },
@@ -794,38 +289,46 @@ const MOCK_DATA = {
   usace: [],
   caiso: { hydro_mw: null, hydro_share_pct: null, sp15_da: null, history: [] },
   regulatory: [],
-  archive: [
-    { issue: "—", title: "Loading recent briefs…", date: "", url: "https://damdoc.substack.com/" }
-  ]
+  archive: [{ issue: "—", title: "Loading recent briefs…", date: "", url: "https://damdoc.substack.com/" }]
 };
 
-// ─────────────────────────────────────────────────────────────
-// BOOTSTRAP
-// ─────────────────────────────────────────────────────────────
-async function bootstrap() {
-  // Load static geo data (basins, rivers, dams) in parallel with live data.
-  // Geo is static so this happens once per page load.
-  await loadGeoData();
-
-  fetch('./data/dashboard.json?t=' + Date.now())
-    .then(r => r.ok ? r.json() : Promise.reject('HTTP ' + r.status))
-    .then(d => render(applyLiveData(d)))
-    .catch(err => {
-      console.warn('dashboard.json unavailable, using fallback:', err);
-      render(MOCK_DATA);
-    });
+// ─── HTML escape helpers ───
+function escAttr(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function escText(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function fmt(v, prefix, suffix, decimals) {
+  if (v == null) return "—";
+  prefix = prefix || ""; suffix = suffix || "";
+  var n = (decimals != null) ? Number(v).toFixed(decimals) : v;
+  return prefix + n + suffix;
 }
 
-// Live fields override; missing fields stay null so render() shows "—".
-function applyLiveData(live) {
-  const out = JSON.parse(JSON.stringify(MOCK_DATA));
-  if (live.meta && live.meta.last_updated_pt) out.meta = live.meta;
+// ─── Bootstrap ───
+function bootstrap() {
+  loadGeoData().then(function () {
+    fetch("./data/dashboard.json?t=" + Date.now())
+      .then(function (r) { return r.ok ? r.json() : Promise.reject("HTTP " + r.status); })
+      .then(function (d) { render(applyLiveData(d)); })
+      .catch(function (err) {
+        console.warn("dashboard.json unavailable, using fallback:", err);
+        render(MOCK_DATA);
+      });
+  });
+}
 
+function applyLiveData(live) {
+  var out = JSON.parse(JSON.stringify(MOCK_DATA));
+  if (live.meta && live.meta.last_updated_pt) out.meta = live.meta;
   if (live.bpa_mix && live.bpa_mix.hydro_pct != null) out.bpa_mix = live.bpa_mix;
   if (live.midc    && live.midc.peak_da     != null) out.midc    = live.midc;
   if (live.wsf     && live.wsf.pct_normal   != null) out.wsf     = live.wsf;
   if (live.caiso   && live.caiso.hydro_mw   != null) out.caiso   = live.caiso;
-
   if (live.basins      && live.basins.length)      out.basins      = live.basins;
   if (live.usace       && live.usace.length)       out.usace       = live.usace;
   if (live.regulatory  && live.regulatory.length)  out.regulatory  = live.regulatory;
@@ -833,719 +336,296 @@ function applyLiveData(live) {
   return out;
 }
 
-// ─────────────────────────────────────────────────────────────
-// HTML ESCAPE HELPERS — used throughout render functions to prevent
-// content from feeds (which may contain &, <, >, ', ") from breaking
-// string-concatenated HTML and inline JS event handlers.
-// ─────────────────────────────────────────────────────────────
-function escAttr(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-function escText(s) {
-  return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// Format helper: value or em-dash if null/undefined.
-function fmt(v, prefix, suffix, decimals) {
-  if (v == null) return '—';
-  prefix = prefix || ''; suffix = suffix || '';
-  const n = (decimals != null) ? Number(v).toFixed(decimals) : v;
-  return prefix + n + suffix;
-}
-
-// ─────────────────────────────────────────────────────────────
-// RENDER
-// ─────────────────────────────────────────────────────────────
+// ─── Render ───
 function render(d) {
-  document.getElementById('last-updated').textContent = d.meta.last_updated_pt;
-  document.getElementById('next-update').textContent  = d.meta.next_update_pt;
+  document.getElementById("last-updated").textContent = d.meta.last_updated_pt;
+  document.getElementById("next-update").textContent  = d.meta.next_update_pt;
 
-  // Headline values
-  document.getElementById('wsf-value').textContent     = fmt(d.wsf.pct_normal);
-  document.getElementById('midc-value').textContent    = fmt(d.midc.peak_da, '$', '', 2);
-  document.getElementById('bpa-hydro-pct').textContent = fmt(d.bpa_mix.hydro_pct, '', '%');
-  document.getElementById('bpa-wind-pct').textContent  = fmt(d.bpa_mix.wind_pct,  '', '%');
-  document.getElementById('bpa-therm-pct').textContent = fmt(d.bpa_mix.thermal_pct, '', '%');
-  document.getElementById('caiso-hydro-mw').textContent = d.caiso.hydro_mw != null
-    ? d.caiso.hydro_mw.toLocaleString()
-    : '—';
+  document.getElementById("wsf-value").textContent     = fmt(d.wsf.pct_normal);
+  document.getElementById("midc-value").textContent    = fmt(d.midc.peak_da, "$", "", 2);
+  document.getElementById("bpa-hydro-pct").textContent = fmt(d.bpa_mix.hydro_pct, "", "%");
+  document.getElementById("bpa-wind-pct").textContent  = fmt(d.bpa_mix.wind_pct,  "", "%");
+  document.getElementById("bpa-therm-pct").textContent = fmt(d.bpa_mix.thermal_pct, "", "%");
+  document.getElementById("caiso-hydro-mw").textContent = d.caiso.hydro_mw != null ? d.caiso.hydro_mw.toLocaleString() : "—";
 
-  // Sub-text lines
-  document.getElementById('wsf-sub').innerHTML = d.wsf.forecast_maf != null
-    ? `NWRFC forecast: <strong style="color:var(--text);">${d.wsf.forecast_maf} MAF</strong> unregulated runoff`
-    : 'NWRFC forecast pending';
-  document.getElementById('midc-sub').innerHTML = d.midc.offpeak_da != null
-    ? `Off-peak: <strong style="color:var(--text);">$${d.midc.offpeak_da.toFixed(2)}/MWh</strong>`
-    : (d.midc.peak_da != null ? 'Peak DA live · off-peak history pending' : 'ICE EOD price pending');
-  document.getElementById('caiso-sub').innerHTML = d.caiso.sp15_da != null
-    ? `Hydro share: <strong style="color:var(--text);">${d.caiso.hydro_share_pct}%</strong> · SP15 DA: <strong style="color:var(--text);">$${d.caiso.sp15_da.toFixed(2)}</strong>`
-    : 'OASIS feed pending';
+  document.getElementById("wsf-sub").innerHTML = d.wsf.forecast_maf != null
+    ? 'NWRFC forecast: <strong style="color:var(--text);">' + escText(d.wsf.forecast_maf) + ' MAF</strong> unregulated runoff'
+    : "NWRFC forecast pending";
+  document.getElementById("midc-sub").innerHTML = d.midc.offpeak_da != null
+    ? 'Off-peak: <strong style="color:var(--text);">$' + d.midc.offpeak_da.toFixed(2) + '/MWh</strong>'
+    : (d.midc.peak_da != null ? "Peak DA live · off-peak history pending" : "ICE EOD price pending");
+  document.getElementById("caiso-sub").innerHTML = d.caiso.sp15_da != null
+    ? 'Hydro share: <strong style="color:var(--text);">' + d.caiso.hydro_share_pct + '%</strong> · SP15 DA: <strong style="color:var(--text);">$' + d.caiso.sp15_da.toFixed(2) + '</strong>'
+    : "OASIS feed pending";
 
-  // Basin table → now replaced by SVG map. Render the map instead.
   renderBasinMap(d.basins);
 
-  // USACE table
-  const usaceTbody = document.getElementById('usace-tbody');
+  var usaceTbody = document.getElementById("usace-tbody");
   if (!d.usace.length) {
-    usaceTbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:24px;font-family:var(--mono);font-size:11px;">USACE data not yet available</td></tr>`;
+    usaceTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:24px;font-family:var(--mono);font-size:11px;">USACE data not yet available</td></tr>';
   } else {
-    usaceTbody.innerHTML = d.usace.map(u => `
-      <tr>
-        <td>${u.project}</td>
-        <td class="num">${u.discharge_kcfs} kcfs</td>
-        <td class="num">${u.forebay_ft.toFixed(1)} ft</td>
-      </tr>
-    `).join('');
+    usaceTbody.innerHTML = d.usace.map(function (u) {
+      return "<tr><td>" + escText(u.project) + "</td>" +
+             '<td class="num">' + u.discharge_kcfs + " kcfs</td>" +
+             '<td class="num">' + u.forebay_ft.toFixed(1) + " ft</td></tr>";
+    }).join("");
   }
 
-  // Regulatory pulse (uses string concat + escapes to avoid template-literal injection)
-  const newsList = document.getElementById('news-list');
+  var newsList = document.getElementById("news-list");
   if (!d.regulatory.length) {
     newsList.innerHTML = '<li class="news-item" style="text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:11px;">No recent filings tracked</li>';
   } else {
     newsList.innerHTML = d.regulatory.map(function (n) {
       var hasUrl = n.url && String(n.url).length > 1;
-      var meta = [n.date, n.source].filter(Boolean).map(escText).join(' · ');
-      var inner =
-        '<div><span class="news-tag ' + escAttr(n.tag_class) + '">' + escText(n.tag) + '</span></div>' +
-        '<div class="news-title">' + escText(n.title) + '</div>' +
-        '<div class="news-meta">' + meta + '</div>';
+      var meta = [n.date, n.source].filter(Boolean).map(escText).join(" · ");
+      var inner = '<div><span class="news-tag ' + escAttr(n.tag_class) + '">' + escText(n.tag) + '</span></div>' +
+                  '<div class="news-title">' + escText(n.title) + '</div>' +
+                  '<div class="news-meta">' + meta + '</div>';
       if (hasUrl) {
-        return '<li class="news-item"><a href="' + escAttr(n.url) +
-               '" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block;">' +
-               inner + '</a></li>';
+        return '<li class="news-item"><a href="' + escAttr(n.url) + '" target="_blank" rel="noopener">' + inner + '</a></li>';
       }
       return '<li class="news-item">' + inner + '</li>';
-    }).join('');
+    }).join("");
   }
 
-  // Archive
-  document.getElementById('archive-grid').innerHTML = d.archive.map(function (a) {
+  document.getElementById("archive-grid").innerHTML = d.archive.map(function (a) {
     return '<a href="' + escAttr(a.url) + '" class="archive-card" target="_blank" rel="noopener">' +
            '<div class="issue">' + escText(a.issue) + '</div>' +
            '<div class="title">' + escText(a.title) + '</div>' +
-           '<div class="date">' + escText(a.date) + '</div>' +
-           '</a>';
-  }).join('');
+           '<div class="date">' + escText(a.date) + '</div></a>';
+  }).join("");
 
-  // Charts
   if (d.midc.history && d.midc.history.length) renderMidCChart(d.midc.history);
-  else clearChart('midc-chart', '30-day history not yet available');
+  else clearChart("midc-chart", "30-day history not yet available");
   if (d.caiso.history && d.caiso.history.length) renderCAISOChart(d.caiso.history);
-  else clearChart('caiso-chart', 'Hourly dispatch not yet available');
+  else clearChart("caiso-chart", "Hourly dispatch not yet available");
 }
 
 function clearChart(canvasId, msg) {
-  const canvas = document.getElementById(canvasId);
-  const ctx = canvas.getContext('2d');
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  var ctx = canvas.getContext("2d");
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#5e6275';
-  ctx.font = '11px -apple-system, "Segoe UI", sans-serif';
-  ctx.textAlign = 'center';
+  ctx.fillStyle = "#5e6275";
+  ctx.font = "11px -apple-system, sans-serif";
+  ctx.textAlign = "center";
   ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
 }
 
-// ─────────────────────────────────────────────────────────────
-// WECC BASIN MAP — D3 + real GeoJSON
-// Loads basins/rivers/dams from /data/geo/ (generated one-time by
-// geo/build_geodata.py from USGS WBD + NHD + Natural Earth). Projects
-// with Albers Equal Area centered on the WECC footprint. Hillshade
-// background is a pre-rendered PNG aligned to the same projection.
-// ─────────────────────────────────────────────────────────────
+// ─── MAP ───
+var MAP_W = 1200, MAP_H = 820;
+var PROJECTION = d3.geoAlbers().rotate([115, 0]).center([0, 43]).parallels([36, 52]).scale(1900).translate([MAP_W / 2, MAP_H / 2]);
+var PATH = d3.geoPath().projection(PROJECTION);
 
-const MAP_W = 1200, MAP_H = 820;
+var currentBasinData = {};
+var geoBasins = null;
+var geoRivers = null;
+var geoDams   = null;
 
-// Albers Equal Area conic, centered on WECC.
-// rotate sets center longitude (~ -115°); parallels frame the projection.
-const PROJECTION = d3.geoAlbers()
-  .rotate([115, 0])
-  .center([0, 43])           // ~43°N visual center
-  .parallels([36, 52])
-  .scale(1900)
-  .translate([MAP_W / 2, MAP_H / 2]);
-
-const PATH = d3.geoPath().projection(PROJECTION);
-
-let currentBasinData = {};      // name -> data row
-let geoBasins   = null;         // FeatureCollection
-let geoRivers   = null;         // FeatureCollection
-let geoDams     = null;         // FeatureCollection
-
-// Load geo data once on page load. Returns a promise that resolves
-// whether all files load or some fail (so render() can still proceed).
-async function loadGeoData() {
-  const tryLoad = (path) =>
-    fetch(path).then(r => r.ok ? r.json() : null).catch(() => null);
-
-  const [basins, rivers, dams] = await Promise.all([
-    tryLoad('./data/geo/basins.geojson'),
-    tryLoad('./data/geo/rivers.geojson'),
-    tryLoad('./data/geo/dams.geojson')
-  ]);
-  geoBasins = basins;
-  geoRivers = rivers;
-  geoDams   = dams;
+function loadGeoData() {
+  function tryLoad(p) {
+    return fetch(p).then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+  }
+  return Promise.all([
+    tryLoad("./data/geo/basins.geojson"),
+    tryLoad("./data/geo/rivers.geojson"),
+    tryLoad("./data/geo/dams.geojson")
+  ]).then(function (results) {
+    geoBasins = results[0];
+    geoRivers = results[1];
+    geoDams   = results[2];
+  });
 }
 
 function basinClass(pct) {
-  if (pct == null) return 'nodata';
-  if (pct < 50)  return 'low';
-  if (pct < 75)  return 'mid';
-  if (pct < 110) return 'normal';
-  return 'high';
+  if (pct == null) return "nodata";
+  if (pct < 50) return "low";
+  if (pct < 75) return "mid";
+  if (pct < 110) return "normal";
+  return "high";
 }
-
 function basinFill(pct) {
-  const map = {
-    low:    '#d4604a',
-    mid:    '#d4a04a',
-    normal: '#5db974',
-    high:   '#4a90c9',
-    nodata: '#2a2d3e'
-  };
-  return map[basinClass(pct)];
-}
-
-// Compute polygon centroid in projected pixel space, for label placement.
-function projectedCentroid(feature) {
-  return PATH.centroid(feature);
+  var c = basinClass(pct);
+  if (c === "low") return "#d4604a";
+  if (c === "mid") return "#d4a04a";
+  if (c === "normal") return "#5db974";
+  if (c === "high") return "#4a90c9";
+  return "#2a2d3e";
 }
 
 function renderBasinMap(basins) {
   currentBasinData = {};
-  basins.forEach(b => { currentBasinData[b.name] = b; });
+  basins.forEach(function (b) { currentBasinData[b.name] = b; });
 
-  const mapWrap = document.getElementById('map-wrap');
-  const tooltip = document.getElementById('map-tooltip');
+  var mapWrap = document.getElementById("map-wrap");
+  var tooltip = document.getElementById("map-tooltip");
 
-  // If geo data didn't load, render a graceful fallback message.
   if (!geoBasins) {
-    mapWrap.innerHTML = `<div style="padding:60px 20px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text-faint);">
-      Geographic data not loaded.<br>
-      Run <code>python geo/build_geodata.py</code> and commit <code>data/geo/</code> to repo.
-    </div>`;
+    mapWrap.innerHTML = '<div style="padding:60px 20px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--text-faint);">Geographic data not loaded.<br>Run <code>python geo/build_geodata.py</code> and commit <code>data/geo/</code> to repo.</div>';
     mapWrap.appendChild(tooltip);
     return;
   }
 
-  // Build SVG string. We use string concat instead of D3 DOM manipulation
-  // because the rest of the dashboard is innerHTML-based; this keeps render
-  // patterns consistent.
-  let svg = `<svg viewBox="0 0 ${MAP_W} ${MAP_H}" xmlns="http://www.w3.org/2000/svg"
-                  role="img" aria-label="WECC basin water conditions map"
-                  preserveAspectRatio="xMidYMid meet">`;
+  var parts = [];
+  parts.push('<svg viewBox="0 0 ' + MAP_W + ' ' + MAP_H + '" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WECC basin water conditions map" preserveAspectRatio="xMidYMid meet">');
+  parts.push('<defs><linearGradient id="map-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0d1018"/><stop offset="100%" stop-color="#0a0c14"/></linearGradient></defs>');
+  parts.push('<rect width="' + MAP_W + '" height="' + MAP_H + '" fill="url(#map-bg)"/>');
+  parts.push('<image href="./data/geo/hillshade.png" x="0" y="0" width="' + MAP_W + '" height="' + MAP_H + '" opacity="0.85" preserveAspectRatio="none"/>');
+  parts.push('<rect width="' + MAP_W + '" height="' + MAP_H + '" fill="#0a0c14" opacity="0.35"/>');
 
-  // 1. Hillshade background (pre-rendered PNG aligned to projection)
-  svg += `<image href="./data/geo/hillshade.png" x="0" y="0"
-                 width="${MAP_W}" height="${MAP_H}"
-                 opacity="0.85" preserveAspectRatio="none"/>`;
-
-  // 2. Dark overlay so basin colors pop against the relief
-  svg += `<rect width="${MAP_W}" height="${MAP_H}" fill="#0a0c14" opacity="0.35"/>`;
-
-  // 3. Rivers (under basins so they peek through at edges)
   if (geoRivers && geoRivers.features) {
-    geoRivers.features.forEach(f => {
-      const d = PATH(f);
-      if (!d) return;
-      const major = (f.properties.scalerank || 99) <= 5;
-      svg += `<path class="river-line ${major ? 'major' : ''}" d="${d}"/>`;
+    geoRivers.features.forEach(function (f) {
+      var dStr = PATH(f);
+      if (!dStr) return;
+      var major = (f.properties.scalerank || 99) <= 5;
+      parts.push('<path class="river-line ' + (major ? "major" : "") + '" d="' + dStr + '"/>');
     });
   }
 
-  // 4. Basin polygons
   geoBasins.features.forEach(function (f) {
     var name = f.properties.name;
     var data = currentBasinData[name];
     var pct  = data ? data.pct_median : null;
-    var d    = PATH(f);
-    if (!d) return;
-    // Encode name for JS string literal in inline handlers — escape quotes/backslashes
-    var jsName = String(name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    svg += '<path class="basin-shape" d="' + d + '"' +
-           ' fill="' + basinFill(pct) + '" fill-opacity="0.65"' +
-           ' data-name="' + escAttr(name) + '"' +
-           " onmousemove=\"showBasinTooltip(event, '" + jsName + "')\"" +
-           ' onmouseleave="hideBasinTooltip()"' +
-           " onclick=\"openBasinDetail('" + jsName + "')\"" +
-           '/>';
+    var dStr = PATH(f);
+    if (!dStr) return;
+    parts.push('<path class="basin-shape" d="' + dStr + '" fill="' + basinFill(pct) + '" fill-opacity="0.65" data-name="' + escAttr(name) + '"/>');
   });
 
-  // 5. Basin labels
   geoBasins.features.forEach(function (f) {
-    var c = projectedCentroid(f);
+    var c = PATH.centroid(f);
     if (isNaN(c[0]) || isNaN(c[1])) return;
     var name = f.properties.name;
-    var short = name.split(' ')[0].length > 9
-      ? name.split(' ')[0]
-      : (name.indexOf('(') >= 0 ? name.split('(')[0].trim() : name);
-    svg += '<text class="basin-label" x="' + c[0] + '" y="' + c[1] + '">' + escText(short) + '</text>';
+    var firstWord = name.split(" ")[0];
+    var shortName = firstWord.length > 9 ? firstWord : (name.indexOf("(") >= 0 ? name.split("(")[0].trim() : name);
+    parts.push('<text class="basin-label" x="' + c[0] + '" y="' + c[1] + '">' + escText(shortName) + '</text>');
   });
 
-  // 6. Dams
   if (geoDams && geoDams.features) {
     geoDams.features.forEach(function (f) {
       var p = PROJECTION(f.geometry.coordinates);
       if (isNaN(p[0]) || isNaN(p[1])) return;
-      var anchor = f.properties.anchor || 'left';
-      var labelX = anchor === 'right' ? p[0] + 10 : p[0] - 10;
-      var textAnchor = anchor === 'right' ? 'start' : 'end';
-      var name = f.properties.name;
-      var meta = f.properties.meta || '';
-      var jsName = String(name).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      var jsMeta = String(meta).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-      svg += '<circle class="dam-marker" cx="' + p[0] + '" cy="' + p[1] + '" r="4.5"' +
-             ' fill="#c9a961" stroke="#0a0c14" stroke-width="1.5"' +
-             " onmouseenter=\"showDamTooltip(event, '" + jsName + "', '" + jsMeta + "')\"" +
-             ' onmouseleave="hideBasinTooltip()"/>';
-      svg += '<text class="dam-label" x="' + labelX + '" y="' + (p[1] + 3) +
-             '" text-anchor="' + textAnchor + '">' + escText(name) + '</text>';
+      var anchor = f.properties.anchor || "left";
+      var labelX = anchor === "right" ? p[0] + 10 : p[0] - 10;
+      var textAnchor = anchor === "right" ? "start" : "end";
+      parts.push('<circle class="dam-marker" cx="' + p[0] + '" cy="' + p[1] + '" r="4.5" fill="#c9a961" stroke="#0a0c14" stroke-width="1.5" data-dam="' + escAttr(f.properties.name) + '" data-meta="' + escAttr(f.properties.meta || "") + '"/>');
+      parts.push('<text class="dam-label" x="' + labelX + '" y="' + (p[1] + 3) + '" text-anchor="' + textAnchor + '">' + escText(f.properties.name) + '</text>');
     });
   }
 
-  svg += `</svg>`;
-
-  mapWrap.innerHTML = svg;
+  parts.push("</svg>");
+  mapWrap.innerHTML = parts.join("");
   mapWrap.appendChild(tooltip);
+
+  // Wire up event listeners via JS (not inline handlers — safer w/r/t escaping)
+  var basinShapes = mapWrap.querySelectorAll(".basin-shape");
+  basinShapes.forEach(function (el) {
+    var name = el.getAttribute("data-name");
+    el.addEventListener("mousemove", function (evt) { showBasinTooltip(evt, name); });
+    el.addEventListener("mouseleave", hideBasinTooltip);
+    el.addEventListener("click", function () { openBasinDetail(name); });
+  });
+  var damMarkers = mapWrap.querySelectorAll(".dam-marker");
+  damMarkers.forEach(function (el) {
+    var name = el.getAttribute("data-dam");
+    var meta = el.getAttribute("data-meta");
+    el.addEventListener("mouseenter", function (evt) { showDamTooltip(evt, name, meta); });
+    el.addEventListener("mouseleave", hideBasinTooltip);
+  });
 }
 
-// ─────────────────────────────────────────────────────────────
-// MAP INTERACTIVITY (unchanged from prior version)
-// ─────────────────────────────────────────────────────────────
 function showBasinTooltip(evt, name) {
-  const tt = document.getElementById('map-tooltip');
-  const data = currentBasinData[name];
-  const wrap = document.getElementById('map-wrap');
-  const rect = wrap.getBoundingClientRect();
-
-  let html = `<div class="tt-name">${name}</div>`;
+  var tt = document.getElementById("map-tooltip");
+  var data = currentBasinData[name];
+  var wrap = document.getElementById("map-wrap");
+  var rect = wrap.getBoundingClientRect();
+  var html = '<div class="tt-name">' + escText(name) + '</div>';
   if (data) {
-    const dSign = data.delta_7d > 0 ? '+' : '';
-    html += `
-      <div class="tt-row"><span>SWE</span><strong>${data.swe_in.toFixed(1)}"</strong></div>
-      <div class="tt-row"><span>% of median</span><strong>${data.pct_median}%</strong></div>
-      <div class="tt-row"><span>Δ 7-day</span><strong>${dSign}${data.delta_7d}</strong></div>
-      <div class="tt-row" style="margin-top:4px;font-size:9px;color:var(--text-faint);">Click for details</div>
-    `;
+    var dSign = data.delta_7d > 0 ? "+" : "";
+    html += '<div class="tt-row"><span>SWE</span><strong>' + data.swe_in.toFixed(1) + '"</strong></div>';
+    html += '<div class="tt-row"><span>% of median</span><strong>' + data.pct_median + '%</strong></div>';
+    html += '<div class="tt-row"><span>Δ 7-day</span><strong>' + dSign + data.delta_7d + '</strong></div>';
+    html += '<div class="tt-row" style="margin-top:4px;font-size:9px;color:var(--text-faint);">Click for details</div>';
   } else {
-    html += `<div class="tt-row" style="color:var(--text-faint);">No data yet</div>`;
+    html += '<div class="tt-row" style="color:var(--text-faint);">No data yet</div>';
   }
   tt.innerHTML = html;
-
-  const x = evt.clientX - rect.left + 14;
-  const y = evt.clientY - rect.top + 14;
-  const tw = tt.offsetWidth || 200;
-  const th = tt.offsetHeight || 80;
-  tt.style.left = Math.min(x, rect.width - tw - 8) + 'px';
-  tt.style.top  = Math.min(y, rect.height - th - 8) + 'px';
-  tt.classList.add('visible');
+  var x = evt.clientX - rect.left + 14;
+  var y = evt.clientY - rect.top + 14;
+  var tw = tt.offsetWidth || 200;
+  var th = tt.offsetHeight || 80;
+  tt.style.left = Math.min(x, rect.width - tw - 8) + "px";
+  tt.style.top  = Math.min(y, rect.height - th - 8) + "px";
+  tt.classList.add("visible");
 }
 
 function showDamTooltip(evt, name, meta) {
-  const tt = document.getElementById('map-tooltip');
-  const wrap = document.getElementById('map-wrap');
-  const rect = wrap.getBoundingClientRect();
-  tt.innerHTML = `<div class="tt-name">${name}</div><div class="tt-row" style="color:var(--text-dim);">${meta}</div>`;
-  const x = evt.clientX - rect.left + 14;
-  const y = evt.clientY - rect.top + 14;
-  tt.style.left = x + 'px';
-  tt.style.top  = y + 'px';
-  tt.classList.add('visible');
+  var tt = document.getElementById("map-tooltip");
+  var wrap = document.getElementById("map-wrap");
+  var rect = wrap.getBoundingClientRect();
+  tt.innerHTML = '<div class="tt-name">' + escText(name) + '</div><div class="tt-row" style="color:var(--text-dim);">' + escText(meta) + '</div>';
+  tt.style.left = (evt.clientX - rect.left + 14) + "px";
+  tt.style.top  = (evt.clientY - rect.top + 14) + "px";
+  tt.classList.add("visible");
 }
 
 function hideBasinTooltip() {
-  document.getElementById('map-tooltip').classList.remove('visible');
+  document.getElementById("map-tooltip").classList.remove("visible");
 }
 
 function openBasinDetail(name) {
-  const data = currentBasinData[name];
-  const drawer = document.getElementById('basin-detail');
-  document.getElementById('detail-name').textContent = name;
-
-  document.querySelectorAll('.basin-shape').forEach(el => {
-    el.classList.toggle('selected', el.getAttribute('data-name') === name);
+  var data = currentBasinData[name];
+  var drawer = document.getElementById("basin-detail");
+  document.getElementById("detail-name").textContent = name;
+  var shapes = document.querySelectorAll(".basin-shape");
+  shapes.forEach(function (el) {
+    if (el.getAttribute("data-name") === name) el.classList.add("selected");
+    else el.classList.remove("selected");
   });
-
-  const grid = document.getElementById('detail-grid');
+  var grid = document.getElementById("detail-grid");
   if (!data) {
-    grid.innerHTML = `<div class="detail-stat"><div class="label">Status</div><div class="num">No data yet</div></div>
-                      <div class="detail-stat"><div class="label">Source</div><div class="num" style="font-size:13px;">SNOTEL · CDEC · BC RFC</div></div>`;
+    grid.innerHTML = '<div class="detail-stat"><div class="label">Status</div><div class="num">No data yet</div></div>' +
+                     '<div class="detail-stat"><div class="label">Source</div><div class="num" style="font-size:13px;">SNOTEL · CDEC · BC RFC</div></div>';
   } else {
-    const dCls = data.delta_7d > 0 ? 'up' : data.delta_7d < 0 ? 'down' : '';
-    const dSign = data.delta_7d > 0 ? '+' : '';
-    grid.innerHTML = `
-      <div class="detail-stat gold"><div class="label">% of Median</div><div class="num">${data.pct_median}%</div></div>
-      <div class="detail-stat"><div class="label">SWE</div><div class="num">${data.swe_in.toFixed(1)}"</div></div>
-      <div class="detail-stat"><div class="label">7-day Δ</div><div class="num ${dCls}">${dSign}${data.delta_7d}</div></div>
-      <div class="detail-stat"><div class="label">Status</div><div class="num" style="font-size:13px;">${basinClass(data.pct_median).toUpperCase()}</div></div>
-    `;
+    var dCls = data.delta_7d > 0 ? "up" : (data.delta_7d < 0 ? "down" : "");
+    var dSign = data.delta_7d > 0 ? "+" : "";
+    grid.innerHTML =
+      '<div class="detail-stat gold"><div class="label">% of Median</div><div class="num">' + data.pct_median + '%</div></div>' +
+      '<div class="detail-stat"><div class="label">SWE</div><div class="num">' + data.swe_in.toFixed(1) + '"</div></div>' +
+      '<div class="detail-stat"><div class="label">7-day Δ</div><div class="num ' + dCls + '">' + dSign + data.delta_7d + '</div></div>' +
+      '<div class="detail-stat"><div class="label">Status</div><div class="num" style="font-size:13px;">' + basinClass(data.pct_median).toUpperCase() + '</div></div>';
   }
-  drawer.classList.add('open');
-  drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  drawer.classList.add("open");
+  drawer.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function closeBasinDetail() {
-  document.getElementById('basin-detail').classList.remove('open');
-  document.querySelectorAll('.basin-shape').forEach(el => el.classList.remove('selected'));
+  document.getElementById("basin-detail").classList.remove("open");
+  var shapes = document.querySelectorAll(".basin-shape");
+  shapes.forEach(function (el) { el.classList.remove("selected"); });
 }
 
-// Chart.js defaults
-  // ── BC Columbia headwaters (top) ──
-  "Mica / Upper Columbia (BC)": {
-    d: "M 460,40 L 560,30 L 600,90 L 580,150 L 510,170 L 450,140 L 430,90 Z",
-    label: [510, 95],
-    short: "BC Upper Col"
-  },
-  "Kootenay (BC)": {
-    d: "M 600,90 L 690,75 L 720,140 L 700,200 L 620,210 L 580,150 Z",
-    label: [650, 145],
-    short: "Kootenay"
-  },
-
-  // ── PNW (Columbia + Snake basins) ──
-  "Upper Columbia (US)": {
-    d: "M 430,170 L 510,170 L 580,200 L 590,260 L 520,290 L 440,280 L 400,220 Z",
-    label: [490, 235],
-    short: "Upper Col US"
-  },
-  "Pend Oreille": {
-    d: "M 580,200 L 700,200 L 720,260 L 680,310 L 590,310 L 590,260 Z",
-    label: [650, 255],
-    short: "Pend Oreille"
-  },
-  "Clearwater": {
-    d: "M 680,310 L 770,310 L 800,370 L 760,420 L 670,410 L 650,350 Z",
-    label: [720, 365],
-    short: "Clearwater"
-  },
-  "Salmon": {
-    d: "M 670,410 L 760,420 L 790,490 L 720,520 L 640,500 L 620,440 Z",
-    label: [705, 465],
-    short: "Salmon"
-  },
-  "Snake River": {
-    d: "M 720,520 L 850,510 L 900,580 L 870,640 L 770,640 L 700,590 Z",
-    label: [800, 580],
-    short: "Snake"
-  },
-  "Yakima": {
-    d: "M 380,290 L 460,290 L 490,340 L 460,380 L 390,380 L 360,330 Z",
-    label: [425, 335],
-    short: "Yakima"
-  },
-  "Owyhee": {
-    d: "M 700,590 L 770,640 L 750,700 L 660,710 L 620,660 L 640,610 Z",
-    label: [695, 655],
-    short: "Owyhee"
-  },
-
-  // ── CAISO / Sierra ──
-  "Northern Sierra (Feather)": {
-    d: "M 280,440 L 360,430 L 380,500 L 350,550 L 280,540 L 250,490 Z",
-    label: [315, 490],
-    short: "N. Sierra"
-  },
-  "Central Sierra (American)": {
-    d: "M 280,540 L 350,550 L 360,600 L 320,640 L 250,630 L 230,580 Z",
-    label: [300, 590],
-    short: "C. Sierra"
-  },
-  "Southern Sierra (San Joaq.)": {
-    d: "M 250,630 L 320,640 L 340,700 L 290,740 L 220,720 L 210,670 Z",
-    label: [275, 685],
-    short: "S. Sierra"
-  },
-  "Tulare (Kings/Kern)": {
-    d: "M 290,740 L 340,700 L 380,750 L 360,800 L 290,810 L 250,770 Z",
-    label: [315, 760],
-    short: "Tulare"
-  }
-};
-
-// River paths — drawn under basin shapes so they peek through at borders.
-const RIVERS = [
-  // Columbia main stem (BC to mouth)
-  { d: "M 520,75 Q 540,140 530,210 Q 510,280 470,330 Q 420,380 380,420 Q 320,440 250,440 Q 180,440 140,450", major: true },
-  // Snake River
-  { d: "M 880,560 Q 800,560 760,570 Q 700,580 670,560 Q 620,540 580,520 Q 530,500 480,470 Q 440,440 410,420", major: true },
-  // Salmon → Snake confluence
-  { d: "M 710,460 Q 680,510 670,540" },
-  // Clearwater → Snake
-  { d: "M 720,360 Q 720,440 700,500" },
-  // Pend Oreille → Columbia
-  { d: "M 650,250 Q 600,270 560,290" },
-  // Kootenay → Columbia
-  { d: "M 650,140 Q 600,170 560,200" },
-  // Yakima → Columbia
-  { d: "M 425,335 Q 440,380 470,400" },
-  // Owyhee → Snake
-  { d: "M 695,655 Q 720,610 770,580" },
-  // Sacramento / Feather → bay
-  { d: "M 315,490 Q 290,560 280,620 Q 270,680 250,730 Q 220,760 180,770", major: true },
-  // Sierra tributaries
-  { d: "M 300,590 Q 270,620 250,660" },
-  { d: "M 275,685 Q 250,710 220,730" }
-];
-
-// Country / state borders — schematic, not geodetic.
-const BORDERS = {
-  country: [
-    // US-Canada border
-    "M 80,180 L 1100,180"
-  ],
-  state: [
-    // WA-OR
-    "M 200,330 L 660,330",
-    // OR-CA
-    "M 130,500 L 660,500",
-    // ID-MT
-    "M 750,180 L 750,500",
-    // ID-NV / OR-NV / CA-NV
-    "M 280,650 L 660,650 L 660,500",
-    // NV-AZ / NV-UT (rough)
-    "M 660,650 L 900,720",
-    // CA coast (rough)
-    "M 80,180 L 80,820"
-  ]
-};
-
-// Major dams / reservoirs to pin (gold dots + labels).
-const DAMS = [
-  { name: "Mica",         x: 510, y: 75,  meta: "BC Hydro · 1,805 MW",     anchor: "left" },
-  { name: "Grand Coulee", x: 510, y: 230, meta: "USBR · 6,809 MW",          anchor: "right" },
-  { name: "Chief Joseph", x: 555, y: 260, meta: "USACE · 2,620 MW",         anchor: "right" },
-  { name: "Dworshak",     x: 700, y: 360, meta: "USACE · 465 MW",           anchor: "left" },
-  { name: "Lower Granite",x: 770, y: 510, meta: "USACE · 932 MW",           anchor: "right" },
-  { name: "The Dalles",   x: 380, y: 410, meta: "USACE · 2,160 MW",         anchor: "left" },
-  { name: "Bonneville",   x: 330, y: 425, meta: "USACE · 1,212 MW",         anchor: "left" },
-  { name: "Shasta",       x: 290, y: 410, meta: "USBR · 710 MW",            anchor: "left" },
-  { name: "Oroville",     x: 315, y: 490, meta: "DWR · 819 MW",             anchor: "left" },
-  { name: "Hoover",       x: 1010, y: 720, meta: "USBR · 2,080 MW",         anchor: "left" },
-  { name: "Glen Canyon",  x: 1060, y: 640, meta: "USBR · 1,320 MW",         anchor: "left" }
-];
-
-// Regional labels (states / provinces) — light, decorative.
-const REGION_LABELS = [
-  { x: 540, y: 60,  text: "BRITISH COLUMBIA" },
-  { x: 300, y: 250, text: "WASHINGTON" },
-  { x: 300, y: 400, text: "OREGON" },
-  { x: 800, y: 280, text: "IDAHO" },
-  { x: 950, y: 200, text: "MONTANA" },
-  { x: 180, y: 600, text: "CALIFORNIA" },
-  { x: 850, y: 600, text: "NEVADA" },
-  { x: 1030, y: 540, text: "UTAH" },
-  { x: 1080, y: 760, text: "ARIZONA" }
-];
-
-function basinClass(pct) {
-  if (pct == null) return 'nodata';
-  if (pct < 50)  return 'low';
-  if (pct < 75)  return 'mid';
-  if (pct < 110) return 'normal';
-  return 'high';
-}
-
-function basinFill(pct) {
-  const map = {
-    low:    '#d4604a',
-    mid:    '#d4a04a',
-    normal: '#5db974',
-    high:   '#4a90c9',
-    nodata: '#2a2d3e'
-  };
-  return map[basinClass(pct)];
-}
-
-let currentBasinData = {}; // name -> data row, for tooltip/detail lookup
-
-function renderBasinMap(basins) {
-  // Index live basin data by name (empty array = all nodata)
-  currentBasinData = {};
-  basins.forEach(b => { currentBasinData[b.name] = b; });
-
-  const W = 1200, H = 820;
-  let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="WECC basin water conditions map">`;
-
-  // Background gradient
-  svg += `<defs>
-    <linearGradient id="map-bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0d1018"/>
-      <stop offset="100%" stop-color="#0a0c14"/>
-    </linearGradient>
-  </defs>`;
-  svg += `<rect width="${W}" height="${H}" fill="url(#map-bg)"/>`;
-
-  // Country borders (dashed)
-  BORDERS.country.forEach(d => {
-    svg += `<path class="country-line" d="${d}"/>`;
-  });
-  // State borders
-  BORDERS.state.forEach(d => {
-    svg += `<path class="state-line" d="${d}"/>`;
-  });
-
-  // Region labels (under basins, faint)
-  REGION_LABELS.forEach(r => {
-    svg += `<text x="${r.x}" y="${r.y}" font-family="-apple-system,sans-serif" font-size="10" letter-spacing="0.15em" fill="#3a3e54" text-anchor="middle">${r.text}</text>`;
-  });
-
-  // Rivers (under basin shapes so confluences read naturally)
-  RIVERS.forEach(r => {
-    svg += `<path class="river-line ${r.major ? 'major' : ''}" d="${r.d}"/>`;
-  });
-
-  // Basin polygons
-  Object.entries(BASIN_GEOMETRY).forEach(([name, g]) => {
-    const data = currentBasinData[name];
-    const pct = data ? data.pct_median : null;
-    svg += `<path class="basin-shape" d="${g.d}"
-              fill="${basinFill(pct)}"
-              fill-opacity="0.78"
-              data-name="${name}"
-              onmousemove="showBasinTooltip(event, '${name}')"
-              onmouseleave="hideBasinTooltip()"
-              onclick="openBasinDetail('${name}')"
-            />`;
-  });
-
-  // Basin labels (over shapes)
-  Object.entries(BASIN_GEOMETRY).forEach(([name, g]) => {
-    svg += `<text class="basin-label" x="${g.label[0]}" y="${g.label[1]}">${g.short}</text>`;
-  });
-
-  // Dams (gold dots + labels, on top of everything)
-  DAMS.forEach(dam => {
-    const labelX = dam.anchor === 'right' ? dam.x + 10 : dam.x - 10;
-    const textAnchor = dam.anchor === 'right' ? 'start' : 'end';
-    svg += `<circle class="dam-marker" cx="${dam.x}" cy="${dam.y}" r="4.5"
-              fill="#c9a961" stroke="#0a0c14" stroke-width="1.5"
-              onmouseenter="showDamTooltip(event, '${dam.name}', '${dam.meta}')"
-              onmouseleave="hideBasinTooltip()"
-            />`;
-    svg += `<text class="dam-label" x="${labelX}" y="${dam.y + 3}" text-anchor="${textAnchor}">${dam.name}</text>`;
-  });
-
-  svg += `</svg>`;
-
-  const mapWrap = document.getElementById('map-wrap');
-  // Preserve the tooltip div, inject SVG before it
-  const tooltip = document.getElementById('map-tooltip');
-  mapWrap.innerHTML = svg;
-  mapWrap.appendChild(tooltip);
-}
-
-// ─────────────────────────────────────────────────────────────
-// MAP INTERACTIVITY
-// ─────────────────────────────────────────────────────────────
-function showBasinTooltip(evt, name) {
-  const tt = document.getElementById('map-tooltip');
-  const data = currentBasinData[name];
-  const wrap = document.getElementById('map-wrap');
-  const rect = wrap.getBoundingClientRect();
-
-  let html = `<div class="tt-name">${name}</div>`;
-  if (data) {
-    const dSign = data.delta_7d > 0 ? '+' : '';
-    html += `
-      <div class="tt-row"><span>SWE</span><strong>${data.swe_in.toFixed(1)}"</strong></div>
-      <div class="tt-row"><span>% of median</span><strong>${data.pct_median}%</strong></div>
-      <div class="tt-row"><span>Δ 7-day</span><strong>${dSign}${data.delta_7d}</strong></div>
-      <div class="tt-row" style="margin-top:4px;font-size:9px;color:var(--text-faint);">Click for details</div>
-    `;
-  } else {
-    html += `<div class="tt-row" style="color:var(--text-faint);">No data yet</div>`;
-  }
-  tt.innerHTML = html;
-
-  const x = evt.clientX - rect.left + 14;
-  const y = evt.clientY - rect.top + 14;
-  // Keep tooltip inside bounds
-  const tw = tt.offsetWidth || 200;
-  const th = tt.offsetHeight || 80;
-  tt.style.left = Math.min(x, rect.width - tw - 8) + 'px';
-  tt.style.top  = Math.min(y, rect.height - th - 8) + 'px';
-  tt.classList.add('visible');
-}
-
-function showDamTooltip(evt, name, meta) {
-  const tt = document.getElementById('map-tooltip');
-  const wrap = document.getElementById('map-wrap');
-  const rect = wrap.getBoundingClientRect();
-  tt.innerHTML = `<div class="tt-name">${name}</div><div class="tt-row" style="color:var(--text-dim);">${meta}</div>`;
-  const x = evt.clientX - rect.left + 14;
-  const y = evt.clientY - rect.top + 14;
-  tt.style.left = x + 'px';
-  tt.style.top  = y + 'px';
-  tt.classList.add('visible');
-}
-
-function hideBasinTooltip() {
-  document.getElementById('map-tooltip').classList.remove('visible');
-}
-
-function openBasinDetail(name) {
-  const data = currentBasinData[name];
-  const drawer = document.getElementById('basin-detail');
-  document.getElementById('detail-name').textContent = name;
-
-  // Highlight selected polygon
-  document.querySelectorAll('.basin-shape').forEach(el => {
-    el.classList.toggle('selected', el.getAttribute('data-name') === name);
-  });
-
-  const grid = document.getElementById('detail-grid');
-  if (!data) {
-    grid.innerHTML = `<div class="detail-stat"><div class="label">Status</div><div class="num">No data yet</div></div>
-                      <div class="detail-stat"><div class="label">Source</div><div class="num" style="font-size:13px;">SNOTEL · CDEC · BC RFC</div></div>`;
-  } else {
-    const dCls = data.delta_7d > 0 ? 'up' : data.delta_7d < 0 ? 'down' : '';
-    const dSign = data.delta_7d > 0 ? '+' : '';
-    grid.innerHTML = `
-      <div class="detail-stat gold"><div class="label">% of Median</div><div class="num">${data.pct_median}%</div></div>
-      <div class="detail-stat"><div class="label">SWE</div><div class="num">${data.swe_in.toFixed(1)}"</div></div>
-      <div class="detail-stat"><div class="label">7-day Δ</div><div class="num ${dCls}">${dSign}${data.delta_7d}</div></div>
-      <div class="detail-stat"><div class="label">Status</div><div class="num" style="font-size:13px;">${basinClass(data.pct_median).toUpperCase()}</div></div>
-    `;
-  }
-  drawer.classList.add('open');
-  drawer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function closeBasinDetail() {
-  document.getElementById('basin-detail').classList.remove('open');
-  document.querySelectorAll('.basin-shape').forEach(el => el.classList.remove('selected'));
-}
-
-// Chart.js defaults
-Chart.defaults.color = '#9498a8';
-Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+// ─── Charts ───
+Chart.defaults.color = "#9498a8";
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif";
 Chart.defaults.font.size = 11;
-Chart.defaults.borderColor = '#2a2d3e';
+Chart.defaults.borderColor = "#2a2d3e";
 
 function renderMidCChart(history) {
-  const ctx = document.getElementById('midc-chart').getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, 0, 220);
-  grad.addColorStop(0, 'rgba(201, 169, 97, 0.35)');
-  grad.addColorStop(1, 'rgba(201, 169, 97, 0.00)');
-
+  var ctx = document.getElementById("midc-chart").getContext("2d");
+  var grad = ctx.createLinearGradient(0, 0, 0, 220);
+  grad.addColorStop(0, "rgba(201, 169, 97, 0.35)");
+  grad.addColorStop(1, "rgba(201, 169, 97, 0.00)");
   new Chart(ctx, {
-    type: 'line',
+    type: "line",
     data: {
-      labels: history.map(h => h.d),
+      labels: history.map(function (h) { return h.d; }),
       datasets: [{
-        data: history.map(h => h.p),
-        borderColor: '#c9a961',
+        data: history.map(function (h) { return h.p; }),
+        borderColor: "#c9a961",
         backgroundColor: grad,
-        fill: true,
-        tension: 0.3,
-        borderWidth: 2,
-        pointRadius: 0,
-        pointHoverRadius: 4,
-        pointHoverBackgroundColor: '#c9a961',
-        pointHoverBorderColor: '#fff'
+        fill: true, tension: 0.3, borderWidth: 2,
+        pointRadius: 0, pointHoverRadius: 4,
+        pointHoverBackgroundColor: "#c9a961", pointHoverBorderColor: "#fff"
       }]
     },
     options: {
@@ -1553,48 +633,40 @@ function renderMidCChart(history) {
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#1c1f2e', borderColor: '#3a3e54', borderWidth: 1,
-          padding: 10, titleColor: '#e8e9ed', bodyColor: '#c9a961', displayColors: false,
-          callbacks: { label: (c) => '$' + c.parsed.y.toFixed(2) + ' /MWh' }
+          backgroundColor: "#1c1f2e", borderColor: "#3a3e54", borderWidth: 1,
+          padding: 10, titleColor: "#e8e9ed", bodyColor: "#c9a961", displayColors: false,
+          callbacks: { label: function (c) { return "$" + c.parsed.y.toFixed(2) + " /MWh"; } }
         }
       },
       scales: {
         x: { grid: { display: false }, ticks: { maxTicksLimit: 6 } },
-        y: {
-          grid: { color: '#22253390' },
-          ticks: { callback: (v) => '$' + v }
-        }
+        y: { grid: { color: "#22253390" }, ticks: { callback: function (v) { return "$" + v; } } }
       }
     }
   });
 }
 
 function renderCAISOChart(history) {
-  const ctx = document.getElementById('caiso-chart').getContext('2d');
+  var ctx = document.getElementById("caiso-chart").getContext("2d");
   new Chart(ctx, {
-    type: 'bar',
+    type: "bar",
     data: {
-      labels: history.map(h => h.h),
-      datasets: [{
-        data: history.map(h => h.mw),
-        backgroundColor: '#4a90c9',
-        borderRadius: 2,
-        barPercentage: 0.7
-      }]
+      labels: history.map(function (h) { return h.h; }),
+      datasets: [{ data: history.map(function (h) { return h.mw; }), backgroundColor: "#4a90c9", borderRadius: 2, barPercentage: 0.7 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#1c1f2e', borderColor: '#3a3e54', borderWidth: 1,
+          backgroundColor: "#1c1f2e", borderColor: "#3a3e54", borderWidth: 1,
           padding: 10, displayColors: false,
-          callbacks: { label: (c) => c.parsed.y.toLocaleString() + ' MW' }
+          callbacks: { label: function (c) { return c.parsed.y.toLocaleString() + " MW"; } }
         }
       },
       scales: {
         x: { grid: { display: false } },
-        y: { grid: { color: '#22253390' }, ticks: { callback: (v) => (v/1000).toFixed(1) + 'k' } }
+        y: { grid: { color: "#22253390" }, ticks: { callback: function (v) { return (v / 1000).toFixed(1) + "k"; } } }
       }
     }
   });
