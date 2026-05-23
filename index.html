@@ -378,6 +378,7 @@ function render(d) {
     ? 'Hydro share: <strong style="color:var(--text);">' + d.caiso.hydro_share_pct + '%</strong> · SP15 DA: <strong style="color:var(--text);">$' + d.caiso.sp15_da.toFixed(2) + '</strong>'
     : "OASIS feed pending";
 
+  window._lastBasins = d.basins;
   renderBasinMap(d.basins);
 
   var usaceTbody = document.getElementById("usace-tbody");
