@@ -693,7 +693,12 @@ function renderCAISOChart(history) {
   });
 }
 
-bootstrap();
+// Wait for DOM ready before kicking off data load
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootstrap);
+} else {
+  bootstrap();
+}
 </script>
 
 </body>
