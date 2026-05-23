@@ -309,16 +309,36 @@ function fmt(v, prefix, suffix, decimals) {
   return prefix + n + suffix;
 }
 
-// ─── Bootstrap ───
 function bootstrap() {
+  // Fetch dashboard data and geo data independently. Render fires
+  // as soon as dashboard.json arrives, regardless of geo file state.
+  // This is critical: geo files may be missing (404) before the
+  // user has run the local Python build, but the rest of the
+  // dashboard should still populate.
+  fetch("./data/dashboard.json?t=" + Date.now())
+    .then(function (r) { return r.ok ? r.json() : Promise.reject("HTTP " + r.status); })
+    .then(function (d) { render(applyLiveData(d)); })
+    .catch(function (err) {
+      console.warn("dashboard.json unavailable, using fallback:", err);
+      render(MOCK_DATA);
+    });
+
+  // Geo data loads in parallel; when it arrives, re-render the basin
+  // map section only (everything else already populated above).
   loadGeoData().then(function () {
-    fetch("./data/dashboard.json?t=" + Date.now())
-      .then(function (r) { return r.ok ? r.json() : Promise.reject("HTTP " + r.status); })
-      .then(function (d) { render(applyLiveData(d)); })
-      .catch(function (err) {
-        console.warn("dashboard.json unavailable, using fallback:", err);
-        render(MOCK_DATA);
-      });
+    // Re-render the map with whatever basin data is in window state.
+    // If render hasn't completed yet, the next render call will pick it up.
+    try {
+      var basinData = [];
+      var basinTbody = document.getElementById("basin-tbody");
+      // Use last known data if available, else empty array
+      if (window._lastBasins) basinData = window._lastBasins;
+      renderBasinMap(basinData);
+    } catch (e) {
+      console.warn("Map render deferred:", e);
+    }
+  }).catch(function (e) {
+    console.warn("Geo data load failed:", e);
   });
 }
 
