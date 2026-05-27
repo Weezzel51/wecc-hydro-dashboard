@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-05-26 09:42 PT",
-    "next_update_pt": "2026-05-27 09:42 PT",
+    "last_updated_pt": "2026-05-27 09:37 PT",
+    "next_update_pt": "2026-05-28 09:37 PT",
     "sources_ok": [
       "bpa_mix",
       "regulatory"
@@ -11,8 +11,8 @@
   "wsf": {},
   "midc": {},
   "bpa_mix": {
-    "hydro_pct": 73,
-    "wind_pct": 12,
+    "hydro_pct": 78,
+    "wind_pct": 6,
     "thermal_pct": 15
   },
   "usace": [],
