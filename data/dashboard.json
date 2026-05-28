@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-05-27 09:37 PT",
-    "next_update_pt": "2026-05-28 09:37 PT",
+    "last_updated_pt": "2026-05-28 09:57 PT",
+    "next_update_pt": "2026-05-29 09:57 PT",
     "sources_ok": [
       "bpa_mix",
       "regulatory"
@@ -11,9 +11,9 @@
   "wsf": {},
   "midc": {},
   "bpa_mix": {
-    "hydro_pct": 78,
-    "wind_pct": 6,
-    "thermal_pct": 15
+    "hydro_pct": 82,
+    "wind_pct": 2,
+    "thermal_pct": 16
   },
   "usace": [],
   "caiso": {},
@@ -51,20 +51,20 @@
       "url": "https://ferc.gov/"
     },
     {
-      "tag": "FERC",
-      "tag_class": "ferc",
-      "title": "Bonneville Power Administration",
-      "date": "2026-04-14",
-      "source": "FERC eLibrary",
-      "url": "https://ferc.gov/"
-    },
-    {
       "tag": "CAISO",
       "tag_class": "market",
       "title": "ISO Markets and Settlements Training Workshop 1/28-30/20",
       "date": "2019-11-12",
       "source": "CAISO Notices",
       "url": "https://www.caiso.com/documents/isomarkets-settlementstrainingworkshop1283020.html"
+    },
+    {
+      "tag": "CAISO",
+      "tag_class": "market",
+      "title": "ISO Markets and Settlements Training Workshop October 22 - 24, 2019",
+      "date": "2019-08-13",
+      "source": "CAISO Notices",
+      "url": "https://www.caiso.com/documents/isomarketsandsettlementstrainingworkshopoctober22-24-2019.html"
     }
   ],
   "archive": [
