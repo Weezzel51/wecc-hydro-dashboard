@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-05-28 09:57 PT",
-    "next_update_pt": "2026-05-29 09:57 PT",
+    "last_updated_pt": "2026-05-29 09:42 PT",
+    "next_update_pt": "2026-05-30 09:42 PT",
     "sources_ok": [
       "bpa_mix",
       "regulatory"
@@ -11,13 +11,21 @@
   "wsf": {},
   "midc": {},
   "bpa_mix": {
-    "hydro_pct": 82,
-    "wind_pct": 2,
-    "thermal_pct": 16
+    "hydro_pct": 81,
+    "wind_pct": 6,
+    "thermal_pct": 13
   },
   "usace": [],
   "caiso": {},
   "regulatory": [
+    {
+      "tag": "FERC",
+      "tag_class": "ferc",
+      "title": "Arlington Valley WECC AZ",
+      "date": "2026-05-28",
+      "source": "FERC eLibrary",
+      "url": "https://ferc.gov/"
+    },
     {
       "tag": "FERC",
       "tag_class": "ferc",
@@ -57,14 +65,6 @@
       "date": "2019-11-12",
       "source": "CAISO Notices",
       "url": "https://www.caiso.com/documents/isomarkets-settlementstrainingworkshop1283020.html"
-    },
-    {
-      "tag": "CAISO",
-      "tag_class": "market",
-      "title": "ISO Markets and Settlements Training Workshop October 22 - 24, 2019",
-      "date": "2019-08-13",
-      "source": "CAISO Notices",
-      "url": "https://www.caiso.com/documents/isomarketsandsettlementstrainingworkshopoctober22-24-2019.html"
     }
   ],
   "archive": [
