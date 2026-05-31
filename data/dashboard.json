@@ -1,15 +1,107 @@
 {
   "meta": {
-    "last_updated_pt": "2026-05-31 16:39 PT",
-    "next_update_pt": "2026-06-01 16:39 PT",
+    "last_updated_pt": "2026-05-31 16:55 PT",
+    "next_update_pt": "2026-06-01 16:55 PT",
     "sources_ok": [
       "bpa_mix",
+      "wsf",
       "caiso",
-      "usace"
+      "usace",
+      "basins"
     ]
   },
-  "basins": [],
-  "wsf": {},
+  "basins": [
+    {
+      "name": "Upper Columbia (US)",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Pend Oreille",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Yakima",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Clearwater",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Salmon",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Upper Snake",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Lower Snake",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Owyhee",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Lower Columbia",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Northern Sierra (Feather)",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Southern Sierra (San Joaq.)",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    },
+    {
+      "name": "Tulare (Kings/Kern)",
+      "pct_median": 0,
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "as_of": "2026-05-31"
+    }
+  ],
+  "wsf": {
+    "site": "The Dalles",
+    "pct_normal": 10,
+    "forecast_maf": null,
+    "as_of": "2026-05-31"
+  },
   "midc": {},
   "bpa_mix": {
     "hydro_pct": 65,
@@ -19,14 +111,14 @@
   "usace": [
     {
       "project": "Lower Granite",
-      "discharge_kcfs": 7.2,
-      "forebay_ft": 9.7,
+      "discharge_kcfs": 7.7,
+      "forebay_ft": null,
       "as_of": "2026-05-31"
     },
     {
       "project": "The Dalles",
       "discharge_kcfs": 204.0,
-      "forebay_ft": 77.8,
+      "forebay_ft": null,
       "as_of": "2026-05-31"
     }
   ],
