@@ -245,16 +245,6 @@
         <div class="headline-sub" id="wsf-sub">NWRFC forecast pending</div>
       </div>
     </div>
-
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Regulatory Pulse</div>
-        <div class="panel-source">FERC · CAISO · BPA</div>
-      </div>
-      <div class="panel-body">
-        <ul class="news-list" id="news-list"></ul>
-      </div>
-    </div>
   </section>
 
   <section class="archive">
@@ -288,7 +278,6 @@ var MOCK_DATA = {
   bpa_mix: { hydro_pct: null, wind_pct: null, thermal_pct: null },
   usace: [],
   caiso: { hydro_mw: null, hydro_share_pct: null, sp15_da: null, history: [] },
-  regulatory: [],
   archive: [{ issue: "—", title: "Loading recent briefs…", date: "", url: "https://damdoc.substack.com/" }]
 };
 
@@ -351,7 +340,6 @@ function applyLiveData(live) {
   if (live.caiso   && live.caiso.hydro_mw   != null) out.caiso   = live.caiso;
   if (live.basins      && live.basins.length)      out.basins      = live.basins;
   if (live.usace       && live.usace.length)       out.usace       = live.usace;
-  if (live.regulatory  && live.regulatory.length)  out.regulatory  = live.regulatory;
   if (live.archive     && live.archive.length)     out.archive     = live.archive;
   return out;
 }
@@ -389,23 +377,6 @@ function render(d) {
       return "<tr><td>" + escText(u.project) + "</td>" +
              '<td class="num">' + u.discharge_kcfs + " kcfs</td>" +
              '<td class="num">' + u.forebay_ft.toFixed(1) + " ft</td></tr>";
-    }).join("");
-  }
-
-  var newsList = document.getElementById("news-list");
-  if (!d.regulatory.length) {
-    newsList.innerHTML = '<li class="news-item" style="text-align:center;color:var(--text-faint);font-family:var(--mono);font-size:11px;">No recent filings tracked</li>';
-  } else {
-    newsList.innerHTML = d.regulatory.map(function (n) {
-      var hasUrl = n.url && String(n.url).length > 1;
-      var meta = [n.date, n.source].filter(Boolean).map(escText).join(" · ");
-      var inner = '<div><span class="news-tag ' + escAttr(n.tag_class) + '">' + escText(n.tag) + '</span></div>' +
-                  '<div class="news-title">' + escText(n.title) + '</div>' +
-                  '<div class="news-meta">' + meta + '</div>';
-      if (hasUrl) {
-        return '<li class="news-item"><a href="' + escAttr(n.url) + '" target="_blank" rel="noopener">' + inner + '</a></li>';
-      }
-      return '<li class="news-item">' + inner + '</li>';
     }).join("");
   }
 

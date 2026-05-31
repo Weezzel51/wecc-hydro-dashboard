@@ -1,26 +1,38 @@
 [
   {
+    "issue": "ISSUE 09",
+    "title": "The WECC hydro stack bifurcated: Columbia stabilizing, Colorado approaching power floors",
+    "date": "May 25, 2026",
+    "url": "https://damdoc.substack.com/p/wecc-hydro-brief-may-25-2026"
+  },
+  {
     "issue": "ISSUE 08",
-    "title": "EDAM go-live: PacifiCorp's first week and the COI basis question",
-    "date": "May 11, 2026",
-    "url": "https://damdoc.substack.com/"
+    "title": "Snow volume is still down. Melt timing just loosened.",
+    "date": "May 17, 2026",
+    "url": "https://damdoc.substack.com/p/wecc-hydro-brief-may-17-2026"
   },
   {
     "issue": "ISSUE 07",
-    "title": "17% YoY PNW hydro growth meets 12% Oregon snowpack — both true",
-    "date": "May 4, 2026",
-    "url": "https://damdoc.substack.com/"
+    "title": "EDAM Day 1 was the easy part",
+    "date": "May 3, 2026",
+    "url": "https://damdoc.substack.com/p/wecc-hydro-brief-may-3-2026"
   },
   {
     "issue": "ISSUE 06",
-    "title": "FERC rescinds WECC soft cap: what changes for Mid-C scarcity hours",
-    "date": "Apr 27, 2026",
-    "url": "https://damdoc.substack.com/"
+    "title": "What 130% of normal streamflow actually means when the freshet already happened",
+    "date": "Apr 26, 2026",
+    "url": "https://damdoc.substack.com/p/wecc-hydro-brief-apr-26-2026"
   },
   {
     "issue": "ISSUE 05",
-    "title": "BC Treaty water timing and the Mid-C basis through August",
+    "title": "Court-ordered spill meets a record-low water year — the 2015 analog is no longer conservative",
     "date": "Apr 20, 2026",
-    "url": "https://damdoc.substack.com/"
+    "url": "https://damdoc.substack.com/p/wecc-hydro-brief-apr-20-2026"
+  },
+  {
+    "issue": "ISSUE 04",
+    "title": "The Canadian wildcard in western power markets",
+    "date": "Apr 13, 2026",
+    "url": "https://damdoc.substack.com/p/wecc-hydro-brief-apr-13-2026"
   }
 ]

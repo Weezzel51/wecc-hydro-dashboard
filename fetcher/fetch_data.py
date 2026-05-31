@@ -568,16 +568,232 @@ def fetch_bc_snow(region_id: str) -> Optional[Dict[str, Any]]:
     }
 
 def fetch_nwrfc_wsf() -> Optional[Dict[str, Any]]:
-    """NWRFC Apr–Sep water supply forecast at The Dalles. Stub."""
-    return None
+    """
+    NWRFC Apr–Sep unregulated water supply forecast at The Dalles.
+
+    Source: NWRFC publishes a CSV table of current-year volume forecasts
+    at https://www.nwrfc.noaa.gov/water_supply/ws_text.php?id=TDAO3&wfo=
+    That page returns a plain-text table. We parse the most recent
+    forecast and the 1981-2010 normal to compute % of normal.
+
+    Fallback: NWRFC also publishes ensemble data at:
+    https://www.nwrfc.noaa.gov/ws/ws_api.php  (GeoJSON-style JSON)
+    """
+    # Primary: NWRFC Water Supply text report for The Dalles (TDAO3)
+    url = "https://www.nwrfc.noaa.gov/water_supply/ws_text.php"
+    params = {"id": "TDAO3", "wfo": ""}
+    try:
+        r = _http_get(url, params=params)
+        text = r.text
+    except Exception as e:
+        _log(f"  ✗ NWRFC WSF primary: {e}")
+        return None
+
+    # The text report includes lines like:
+    # "Apr-Sep  1234  MAF  123%  ..."
+    # We scan for a line with Apr-Sep and extract volume + percent
+    pct_normal = None
+    forecast_maf = None
+
+    for line in text.splitlines():
+        line = line.strip()
+        # Look for lines mentioning Apr-Sep and a percentage
+        if re.search(r"apr.?sep", line, re.IGNORECASE):
+            # Extract percentage
+            m_pct = re.search(r"(\d{1,3})\s*%", line)
+            if m_pct:
+                pct_normal = int(m_pct.group(1))
+            # Extract MAF (million acre-feet): number before "MAF" or after "%" in a numeric field
+            m_maf = re.search(r"(\d+\.?\d*)\s*(?:MAF|maf)", line)
+            if m_maf:
+                forecast_maf = float(m_maf.group(1))
+            if pct_normal is not None:
+                break
+
+    # Fallback: scan for any percentage on a line with the forecast period
+    if pct_normal is None:
+        for line in text.splitlines():
+            m = re.search(r"(\d{2,4})\s+(\d{1,3})%", line)
+            if m:
+                forecast_maf = float(m.group(1))
+                pct_normal   = int(m.group(2))
+                break
+
+    if pct_normal is None:
+        _log("  ✗ NWRFC WSF: could not parse percent of normal from response")
+        return None
+
+    _log(f"  ✓ NWRFC WSF: {pct_normal}% of normal ({forecast_maf} MAF)")
+    return {
+        "site":         "The Dalles",
+        "pct_normal":   pct_normal,
+        "forecast_maf": forecast_maf,
+        "as_of":        datetime.date.today().isoformat(),
+    }
+
 
 def fetch_usace_project(code: str) -> Optional[Dict[str, Any]]:
-    """USACE NWD dataquery — discharge + forebay. Stub."""
-    return None
+    """
+    USACE NWD dataquery — current discharge (kcfs) and forebay elevation (ft).
+
+    Source: USACE Northwestern Division Dataquery 2.0
+    https://www.nwd-wc.usace.army.mil/dd/common/dataquery/www/
+
+    The endpoint accepts project codes (e.g. GCL, BON) and returns JSON
+    with the most recent observed values for outflow and forebay.
+    """
+    base = "https://www.nwd-wc.usace.army.mil/dd/common/dataquery/www/"
+    # Parameters for daily outflow (QD) and forebay (FB) for today
+    today = datetime.date.today()
+    yesterday = today - datetime.timedelta(days=1)
+    params = {
+        "id":     code,
+        "dt":     "daily",
+        "variable": "QD,FB",
+        "startdate": yesterday.strftime("%Y-%m-%d"),
+        "enddate":   today.strftime("%Y-%m-%d"),
+        "format":   "json",
+    }
+    try:
+        r = _http_get(base, params=params)
+        data = r.json()
+    except Exception as e:
+        _log(f"  ✗ USACE {code}: {e}")
+        return None
+
+    # Response structure: {"data": [{...},...], "sites": {...}}
+    # Each data item has "site_id", "parameter", "values": [[timestamp, value], ...]
+    discharge_kcfs = None
+    forebay_ft     = None
+
+    datasets = data if isinstance(data, list) else data.get("data", [])
+    for ds in datasets:
+        param  = str(ds.get("parameter", "")).upper()
+        values = ds.get("values", [])
+        if not values:
+            continue
+        # Take most recent non-null value
+        for ts, val in reversed(values):
+            if val is not None:
+                try:
+                    v = float(val)
+                except (TypeError, ValueError):
+                    continue
+                if "QD" in param or "FLOW" in param or "OUTFLOW" in param:
+                    discharge_kcfs = round(v, 1)
+                elif "FB" in param or "FOREBAY" in param or "ELEV" in param:
+                    forebay_ft = round(v, 1)
+                break
+
+    if discharge_kcfs is None and forebay_ft is None:
+        _log(f"  ✗ USACE {code}: no usable data in response")
+        return None
+
+    _log(f"  ✓ USACE {code}: {discharge_kcfs} kcfs / {forebay_ft} ft")
+    return {
+        "discharge_kcfs": discharge_kcfs,
+        "forebay_ft":     forebay_ft,
+        "as_of":          today.isoformat(),
+    }
+
 
 def fetch_caiso_hydro() -> Optional[Dict[str, Any]]:
-    """CAISO OASIS — hydro dispatch + SP15. Stub."""
-    return None
+    """
+    CAISO OASIS — current hydro dispatch (MW) and SP15 day-ahead price.
+
+    Source: CAISO OASIS API (public, no auth required)
+    Endpoint: http://oasis.caiso.com/oasisapi/SingleZip
+    Query type: SLD_FCST (system load + renewable forecast, includes hydro)
+    and PRC_LMP for SP15 prices.
+
+    We use the ENE_SLRS (Renewables + Storage supply) report which includes
+    hydro as a fuel type under "renewable" generation.
+
+    Practical note: CAISO OASIS can be slow. We use the "AT" (Actual Trades)
+    market results for hydro generation via the PROD_MW endpoint.
+    """
+    today     = datetime.date.today()
+    yesterday = today - datetime.timedelta(days=1)
+    base      = "http://oasis.caiso.com/oasisapi/SingleZip"
+
+    def oasis_get(query_name, startdt, enddt, extra=None):
+        params = {
+            "queryname": query_name,
+            "startdatetime": startdt.strftime("%Y%m%dT07:00-0000"),
+            "enddatetime":   enddt.strftime("%Y%m%dT07:00-0000"),
+            "version":       1,
+        }
+        if extra:
+            params.update(extra)
+        r = _http_get(base, params=params)
+        import zipfile, io
+        z = zipfile.ZipFile(io.BytesIO(r.content))
+        # Find the XML file inside the zip
+        xml_name = next((n for n in z.namelist() if n.endswith(".xml")), None)
+        if not xml_name:
+            return None
+        return ET.fromstring(z.read(xml_name))
+
+    hydro_mw    = None
+    sp15_da     = None
+    hydro_share = None
+    history     = []
+
+    # ── Hydro generation: SLD_REN_FCST (renewable + hydro supply) ──
+    try:
+        root = oasis_get("ENE_SLRS", yesterday, today,
+                         extra={"market_run_id": "ACTUAL", "tac_zone_name": "ALL"})
+        if root is not None:
+            ns  = {"c": "http://www.caiso.com/soa/OASISReport_v1.xsd"}
+            mw_vals = []
+            for rpt in root.findall(".//c:REPORT_DATA", ns):
+                fuel = rpt.findtext("c:FUEL_TYPE", namespaces=ns) or ""
+                mkt  = rpt.findtext("c:MARKET_RUN_ID", namespaces=ns) or ""
+                if "HYDR" in fuel.upper() and "ACTUAL" in mkt.upper():
+                    val = rpt.findtext("c:MW", namespaces=ns)
+                    if val:
+                        try:
+                            mw_vals.append(float(val))
+                        except ValueError:
+                            pass
+            if mw_vals:
+                hydro_mw = round(sum(mw_vals) / len(mw_vals))
+    except Exception as e:
+        _log(f"  · CAISO hydro MW: {type(e).__name__}: {e}")
+
+    # ── SP15 DA LMP (day-ahead locational marginal price) ──
+    try:
+        root = oasis_get("PRC_LMP", yesterday, today,
+                         extra={"market_run_id": "DAM", "node": "TH_SP15_GEN-APND"})
+        if root is not None:
+            ns = {"c": "http://www.caiso.com/soa/OASISReport_v1.xsd"}
+            lmp_vals = []
+            for rpt in root.findall(".//c:REPORT_DATA", ns):
+                lmp_type = rpt.findtext("c:LMP_TYPE", namespaces=ns) or ""
+                if lmp_type.upper() == "LMP":
+                    val = rpt.findtext("c:MW", namespaces=ns)
+                    if val:
+                        try:
+                            lmp_vals.append(float(val))
+                        except ValueError:
+                            pass
+            if lmp_vals:
+                sp15_da = round(sum(lmp_vals) / len(lmp_vals), 2)
+    except Exception as e:
+        _log(f"  · CAISO SP15 DA: {type(e).__name__}: {e}")
+
+    if hydro_mw is None and sp15_da is None:
+        _log("  ✗ CAISO: no data retrieved")
+        return None
+
+    _log(f"  ✓ CAISO: hydro {hydro_mw} MW / SP15 DA ${sp15_da}")
+    return {
+        "hydro_mw":        hydro_mw,
+        "hydro_share_pct": hydro_share,
+        "sp15_da":         sp15_da,
+        "history":         history,
+        "as_of":           today.isoformat(),
+    }
 
 
 # ══════════════════════════════════════════════════════════════════════
@@ -783,11 +999,6 @@ def main() -> int:
             usace_rows.append({"project": p["name"], **data})
     caiso = _safe(fetch_caiso_hydro, "CAISO OASIS")
 
-    # Regulatory (3 feeds combined)
-    _log("Regulatory pulse:")
-    reg = _safe(fetch_regulatory_pulse, "Regulatory pulse") or []
-    _log(f"  ✓ {len(reg)} items after dedupe")
-
     archive = load_archive()
 
     output = {
@@ -797,17 +1008,16 @@ def main() -> int:
             "sources_ok": [k for k, v in {
                 "bpa_mix": bpa_mix, "midc": midc, "wsf": wsf,
                 "caiso": caiso, "usace": bool(usace_rows),
-                "basins": bool(basins), "regulatory": bool(reg),
+                "basins": bool(basins),
             }.items() if v],
         },
-        "basins":     basins,
-        "wsf":        wsf or {},
-        "midc":       midc or {},
-        "bpa_mix":    bpa_mix or {},
-        "usace":      usace_rows,
-        "caiso":      caiso or {},
-        "regulatory": reg,
-        "archive":    archive,
+        "basins":  basins,
+        "wsf":     wsf or {},
+        "midc":    midc or {},
+        "bpa_mix": bpa_mix or {},
+        "usace":   usace_rows,
+        "caiso":   caiso or {},
+        "archive": archive,
     }
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
