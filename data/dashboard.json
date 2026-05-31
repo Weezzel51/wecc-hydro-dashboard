@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-05-31 16:23 PT",
-    "next_update_pt": "2026-06-01 16:23 PT",
+    "last_updated_pt": "2026-05-31 16:39 PT",
+    "next_update_pt": "2026-06-01 16:39 PT",
     "sources_ok": [
       "bpa_mix",
       "caiso",
@@ -25,7 +25,7 @@
     },
     {
       "project": "The Dalles",
-      "discharge_kcfs": 210.0,
+      "discharge_kcfs": 204.0,
       "forebay_ft": 77.8,
       "as_of": "2026-05-31"
     }
