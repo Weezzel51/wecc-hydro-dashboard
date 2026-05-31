@@ -46,30 +46,42 @@
   @media (max-width: 900px) { .grid-tier-1, .grid-tier-2 { grid-template-columns: 1fr; } .masthead, .container { padding-left: 18px; padding-right: 18px; } .brand-block h1 { font-size: 22px; } }
 
   .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
-  .panel-header { padding: 14px 18px 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .panel-header { padding: 10px 14px 9px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
   .panel-title { font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text); }
   .panel-source { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.04em; }
-  .panel-body { padding: 20px 18px; }
+  .panel-body { padding: 14px 14px 12px; }
 
-  .headline { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; }
-  .headline .value { font-family: var(--serif); font-size: 44px; font-weight: 400; letter-spacing: -0.02em; color: var(--text); line-height: 1; }
-  .headline .unit { font-size: 14px; color: var(--text-dim); font-weight: 500; }
-  .headline-sub { font-size: 12px; color: var(--text-dim); margin-bottom: 18px; }
+  .headline { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+  .headline .value { font-family: var(--serif); font-size: 34px; font-weight: 400; letter-spacing: -0.02em; color: var(--text); line-height: 1; }
+  .headline .value.pending { font-size: 20px; color: var(--text-faint); font-family: var(--mono); }
+  .headline .unit { font-size: 12px; color: var(--text-dim); font-weight: 500; }
+  .headline-sub { font-size: 11px; color: var(--text-dim); margin-bottom: 12px; }
 
-  .basin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .basin-table th { text-align: left; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  .basin-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .basin-table th { text-align: left; font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); padding: 6px 6px; border-bottom: 1px solid var(--border); }
   .basin-table th.num, .basin-table td.num { text-align: right; font-family: var(--mono); }
-  .basin-table td { padding: 10px 6px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .basin-table td { padding: 7px 6px; border-bottom: 1px solid var(--border); color: var(--text); }
   .basin-table tr:last-child td { border-bottom: none; }
 
-  .chart-wrap { position: relative; height: 220px; margin-top: 8px; }
-  .chart-wrap.small { height: 140px; }
+  .chart-wrap { position: relative; height: 160px; margin-top: 8px; }
+  .chart-wrap.small { height: 110px; }
+  .chart-wrap.hidden { display: none; }
 
-  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
-  .stat { border-left: 2px solid var(--border-strong); padding-left: 10px; }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+  .stat { border-left: 2px solid var(--border-strong); padding-left: 9px; }
   .stat.gold { border-color: var(--gold); }
-  .stat .label { font-size: 10px; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
-  .stat .num { font-family: var(--mono); font-size: 16px; color: var(--text); }
+  .stat .label { font-size: 9px; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2px; }
+  .stat .num { font-family: var(--mono); font-size: 15px; color: var(--text); }
+
+  .pending-badge { font-family: var(--mono); font-size: 10px; color: var(--text-faint); background: var(--bg); border: 1px solid var(--border); border-radius: 2px; padding: 2px 7px; display: inline-block; letter-spacing: 0.06em; }
+  .data-grid { display: grid; gap: 10px; margin-top: 2px; }
+  .data-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .data-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .data-item .di-label { font-size: 9px; color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+  .data-item .di-val { font-family: var(--mono); font-size: 18px; color: var(--text); line-height: 1.1; }
+  .data-item .di-val.lg { font-family: var(--serif); font-size: 28px; }
+  .data-item .di-val.pending { color: var(--text-faint); font-size: 13px; }
+  .data-item .di-unit { font-size: 10px; color: var(--text-dim); margin-top: 1px; }
 
   .news-list { list-style: none; }
   .news-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
@@ -83,17 +95,17 @@
   .news-title { font-size: 13px; color: var(--text); line-height: 1.45; margin-bottom: 4px; }
   .news-meta { font-family: var(--mono); font-size: 10px; color: var(--text-faint); }
 
-  .archive { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border); }
-  .archive-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; }
-  .archive-header h2 { font-family: var(--serif); font-size: 20px; font-weight: 400; }
+  .archive { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); }
+  .archive-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .archive-header h2 { font-family: var(--serif); font-size: 17px; font-weight: 400; }
   .archive-link { font-family: var(--mono); font-size: 11px; color: var(--gold); text-decoration: none; letter-spacing: 0.05em; }
   .archive-link:hover { color: var(--text); }
-  .archive-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-  .archive-card { background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: 4px; transition: border-color 0.15s; text-decoration: none; color: inherit; display: block; }
+  .archive-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .archive-card { background: var(--bg); border: 1px solid var(--border); padding: 12px 14px; border-radius: 4px; transition: border-color 0.15s; text-decoration: none; color: inherit; display: block; }
   .archive-card:hover { border-color: var(--gold-dim); }
-  .archive-card .issue { font-family: var(--mono); font-size: 10px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 8px; }
-  .archive-card .title { font-family: var(--serif); font-size: 15px; line-height: 1.35; margin-bottom: 10px; }
-  .archive-card .date { font-family: var(--mono); font-size: 10px; color: var(--text-faint); }
+  .archive-card .issue { font-family: var(--mono); font-size: 9px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 6px; }
+  .archive-card .title { font-family: var(--serif); font-size: 13px; line-height: 1.35; margin-bottom: 8px; }
+  .archive-card .date { font-family: var(--mono); font-size: 9px; color: var(--text-faint); }
 
   footer { margin-top: 48px; padding: 24px 32px; border-top: 1px solid var(--border); text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text-faint); letter-spacing: 0.08em; }
   footer .footer-brand { color: var(--gold); }
@@ -190,61 +202,76 @@
     </div>
   </section>
 
-  <section class="grid-tier-2">
+  <section class="grid-tier-2" style="margin-bottom:20px;">
+
+    <!-- Mid-C Price + BPA Fuel Mix -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">Mid-Columbia Power Market</div>
-        <div class="panel-source">ICE EOD · EIA-930</div>
+        <div class="panel-title">Mid-Columbia Market</div>
+        <div class="panel-source">EIA Wholesale · EIA-930</div>
       </div>
       <div class="panel-body">
-        <div class="headline"><span class="value" id="midc-value">—</span><span class="unit">/MWh · Mid-C peak DA</span></div>
-        <div class="headline-sub" id="midc-sub">ICE EOD price pending</div>
-        <div class="stat-row">
-          <div class="stat gold"><div class="label">BPA Hydro %</div><div class="num" id="bpa-hydro-pct">—</div></div>
-          <div class="stat"><div class="label">Wind %</div><div class="num" id="bpa-wind-pct">—</div></div>
-          <div class="stat"><div class="label">Thermal %</div><div class="num" id="bpa-therm-pct">—</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+          <div class="data-item">
+            <div class="di-label">Mid-C Peak DA</div>
+            <div class="di-val lg" id="midc-value">—</div>
+            <div class="di-unit" id="midc-sub">price pending</div>
+          </div>
+          <div class="data-item">
+            <div class="di-label">WSF · The Dalles</div>
+            <div class="di-val lg" id="wsf-value">—</div>
+            <div class="di-unit" id="wsf-sub">% of normal · Apr–Sep</div>
+          </div>
         </div>
-        <div class="chart-wrap"><canvas id="midc-chart"></canvas></div>
+        <div style="border-top:1px solid var(--border);padding-top:10px;margin-bottom:8px;">
+          <div style="font-size:9px;color:var(--text-faint);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;">BPA Fuel Mix · 24h avg</div>
+          <div class="stat-row">
+            <div class="stat gold"><div class="label">Hydro</div><div class="num" id="bpa-hydro-pct">—</div></div>
+            <div class="stat"><div class="label">Wind</div><div class="num" id="bpa-wind-pct">—</div></div>
+            <div class="stat"><div class="label">Thermal</div><div class="num" id="bpa-therm-pct">—</div></div>
+          </div>
+        </div>
+        <div class="chart-wrap hidden" id="midc-chart-wrap"><canvas id="midc-chart"></canvas></div>
       </div>
     </div>
 
+    <!-- USACE Project Discharge -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">USACE Project Discharge</div>
-        <div class="panel-source">USACE NWD</div>
+        <div class="panel-title">Columbia River Projects</div>
+        <div class="panel-source">USGS NWIS</div>
       </div>
-      <div class="panel-body">
+      <div class="panel-body" style="padding-top:10px;padding-bottom:10px;">
         <table class="basin-table">
-          <thead><tr><th>Project</th><th class="num">Discharge</th><th class="num">Forebay</th></tr></thead>
+          <thead><tr><th>Project</th><th class="num">Discharge</th><th class="num">Elev ft</th></tr></thead>
           <tbody id="usace-tbody"></tbody>
         </table>
       </div>
     </div>
 
+    <!-- CAISO Hydro -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">CAISO Hydro Snapshot</div>
-        <div class="panel-source">CAISO OASIS</div>
+        <div class="panel-title">CAISO Hydro</div>
+        <div class="panel-source">EIA-930 · CISO</div>
       </div>
       <div class="panel-body">
-        <div class="headline"><span class="value" id="caiso-hydro-mw">—</span><span class="unit">MW</span></div>
-        <div class="headline-sub" id="caiso-sub">OASIS feed pending</div>
-        <div class="chart-wrap small"><canvas id="caiso-chart"></canvas></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">
+          <div class="data-item">
+            <div class="di-label">Hydro Dispatch</div>
+            <div class="di-val lg" id="caiso-hydro-mw">—</div>
+            <div class="di-unit">MW · 24h avg</div>
+          </div>
+          <div class="data-item">
+            <div class="di-label">Grid Share</div>
+            <div class="di-val lg" id="caiso-share">—</div>
+            <div class="di-unit" id="caiso-sub">of CAISO generation</div>
+          </div>
+        </div>
+        <div class="chart-wrap small hidden" id="caiso-chart-wrap"><canvas id="caiso-chart"></canvas></div>
       </div>
     </div>
-  </section>
 
-  <section class="grid-tier-1">
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title">Columbia Water Supply Forecast</div>
-        <div class="panel-source">NWRFC</div>
-      </div>
-      <div class="panel-body">
-        <div class="headline"><span class="value" id="wsf-value">—</span><span class="unit">% of normal · Apr–Sep WSF, The Dalles</span></div>
-        <div class="headline-sub" id="wsf-sub">NWRFC forecast pending</div>
-      </div>
-    </div>
   </section>
 
   <section class="archive">
@@ -349,34 +376,65 @@ function render(d) {
   document.getElementById("last-updated").textContent = d.meta.last_updated_pt;
   document.getElementById("next-update").textContent  = d.meta.next_update_pt;
 
-  document.getElementById("wsf-value").textContent     = fmt(d.wsf.pct_normal);
-  document.getElementById("midc-value").textContent    = fmt(d.midc.peak_da, "$", "", 2);
+  // Mid-C price
+  var midcEl = document.getElementById("midc-value");
+  if (d.midc.peak_da != null) {
+    midcEl.textContent = "$" + d.midc.peak_da.toFixed(2);
+    midcEl.className = "di-val lg";
+    document.getElementById("midc-sub").textContent = d.midc.wow_pct != null
+      ? "/MWh · " + (d.midc.wow_pct > 0 ? "+" : "") + d.midc.wow_pct + "% WoW"
+      : "/MWh peak DA";
+  } else {
+    midcEl.textContent = "pending";
+    midcEl.className = "di-val pending";
+  }
+
+  // WSF
+  var wsfEl = document.getElementById("wsf-value");
+  if (d.wsf.pct_normal != null) {
+    wsfEl.textContent = d.wsf.pct_normal + "%";
+    wsfEl.className = "di-val lg";
+    document.getElementById("wsf-sub").textContent = d.wsf.forecast_maf
+      ? "% of normal · " + d.wsf.forecast_maf + " MAF"
+      : "% of normal · Apr–Sep";
+  } else {
+    wsfEl.textContent = "pending";
+    wsfEl.className = "di-val pending";
+  }
+
+  // BPA mix
   document.getElementById("bpa-hydro-pct").textContent = fmt(d.bpa_mix.hydro_pct, "", "%");
   document.getElementById("bpa-wind-pct").textContent  = fmt(d.bpa_mix.wind_pct,  "", "%");
   document.getElementById("bpa-therm-pct").textContent = fmt(d.bpa_mix.thermal_pct, "", "%");
-  document.getElementById("caiso-hydro-mw").textContent = d.caiso.hydro_mw != null ? d.caiso.hydro_mw.toLocaleString() : "—";
 
-  document.getElementById("wsf-sub").innerHTML = d.wsf.forecast_maf != null
-    ? 'NWRFC forecast: <strong style="color:var(--text);">' + escText(d.wsf.forecast_maf) + ' MAF</strong> unregulated runoff'
-    : "NWRFC forecast pending";
-  document.getElementById("midc-sub").innerHTML = d.midc.offpeak_da != null
-    ? 'Off-peak: <strong style="color:var(--text);">$' + d.midc.offpeak_da.toFixed(2) + '/MWh</strong>'
-    : (d.midc.peak_da != null ? "Peak DA live · off-peak history pending" : "ICE EOD price pending");
-  document.getElementById("caiso-sub").innerHTML = d.caiso.sp15_da != null
-    ? 'Hydro share: <strong style="color:var(--text);">' + d.caiso.hydro_share_pct + '%</strong> · SP15 DA: <strong style="color:var(--text);">$' + d.caiso.sp15_da.toFixed(2) + '</strong>'
-    : "OASIS feed pending";
+  // CAISO
+  var caisoMwEl = document.getElementById("caiso-hydro-mw");
+  var caisoShareEl = document.getElementById("caiso-share");
+  if (d.caiso.hydro_mw != null) {
+    caisoMwEl.textContent = d.caiso.hydro_mw.toLocaleString();
+    caisoMwEl.className = "di-val lg";
+    caisoShareEl.textContent = d.caiso.hydro_share_pct != null ? d.caiso.hydro_share_pct + "%" : "—";
+    caisoShareEl.className = "di-val lg";
+    document.getElementById("caiso-sub").textContent = "of CAISO generation";
+  } else {
+    caisoMwEl.textContent = "pending";
+    caisoMwEl.className = "di-val pending";
+    caisoShareEl.textContent = "—";
+    caisoShareEl.className = "di-val pending";
+  }
 
   window._lastBasins = d.basins;
   renderBasinMap(d.basins);
 
   var usaceTbody = document.getElementById("usace-tbody");
   if (!d.usace.length) {
-    usaceTbody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-faint);padding:24px;font-family:var(--mono);font-size:11px;">USACE data not yet available</td></tr>';
+    usaceTbody.innerHTML = '<tr><td colspan="3" style="color:var(--text-faint);padding:10px 6px;font-family:var(--mono);font-size:10px;">Fetching USGS gauge data…</td></tr>';
   } else {
     usaceTbody.innerHTML = d.usace.map(function (u) {
+      var fb = u.forebay_ft != null ? u.forebay_ft.toFixed(0) + " ft" : "—";
       return "<tr><td>" + escText(u.project) + "</td>" +
-             '<td class="num">' + u.discharge_kcfs + " kcfs</td>" +
-             '<td class="num">' + u.forebay_ft.toFixed(1) + " ft</td></tr>";
+             '<td class="num">' + (u.discharge_kcfs != null ? u.discharge_kcfs + " kcfs" : "—") + "</td>" +
+             '<td class="num">' + fb + "</td></tr>";
     }).join("");
   }
 
@@ -387,10 +445,14 @@ function render(d) {
            '<div class="date">' + escText(a.date) + '</div></a>';
   }).join("");
 
-  if (d.midc.history && d.midc.history.length) renderMidCChart(d.midc.history);
-  else clearChart("midc-chart", "30-day history not yet available");
-  if (d.caiso.history && d.caiso.history.length) renderCAISOChart(d.caiso.history);
-  else clearChart("caiso-chart", "Hourly dispatch not yet available");
+  if (d.midc.history && d.midc.history.length) {
+    document.getElementById("midc-chart-wrap").classList.remove("hidden");
+    renderMidCChart(d.midc.history);
+  }
+  if (d.caiso.history && d.caiso.history.length) {
+    document.getElementById("caiso-chart-wrap").classList.remove("hidden");
+    renderCAISOChart(d.caiso.history);
+  }
 }
 
 function clearChart(canvasId, msg) {
