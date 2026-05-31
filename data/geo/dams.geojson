@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {"type":"Feature","properties":{"name":"Mica","meta":"BC Hydro · 1,805 MW","anchor":"left"},"geometry":{"type":"Point","coordinates":[-118.566,52.083]}},
+    {"type":"Feature","properties":{"name":"Revelstoke","meta":"BC Hydro · 2,480 MW","anchor":"right"},"geometry":{"type":"Point","coordinates":[-118.196,51.049]}},
+    {"type":"Feature","properties":{"name":"Grand Coulee","meta":"USBR · 6,809 MW","anchor":"right"},"geometry":{"type":"Point","coordinates":[-118.982,47.957]}},
+    {"type":"Feature","properties":{"name":"Chief Joseph","meta":"USACE · 2,620 MW","anchor":"left"},"geometry":{"type":"Point","coordinates":[-119.638,47.997]}},
+    {"type":"Feature","properties":{"name":"Dworshak","meta":"USACE · 465 MW","anchor":"right"},"geometry":{"type":"Point","coordinates":[-116.301,46.516]}},
+    {"type":"Feature","properties":{"name":"Lower Granite","meta":"USACE · 932 MW","anchor":"right"},"geometry":{"type":"Point","coordinates":[-117.428,46.660]}},
+    {"type":"Feature","properties":{"name":"Ice Harbor","meta":"USACE · 693 MW","anchor":"right"},"geometry":{"type":"Point","coordinates":[-118.881,46.249]}},
+    {"type":"Feature","properties":{"name":"McNary","meta":"USACE · 1,127 MW","anchor":"right"},"geometry":{"type":"Point","coordinates":[-119.298,45.935]}},
+    {"type":"Feature","properties":{"name":"John Day","meta":"USACE · 2,160 MW","anchor":"left"},"geometry":{"type":"Point","coordinates":[-120.693,45.715]}},
+    {"type":"Feature","properties":{"name":"The Dalles","meta":"USACE · 2,160 MW","anchor":"left"},"geometry":{"type":"Point","coordinates":[-121.135,45.614]}},
+    {"type":"Feature","properties":{"name":"Bonneville","meta":"USACE · 1,212 MW","anchor":"left"},"geometry":{"type":"Point","coordinates":[-121.940,45.644]}},
+    {"type":"Feature","properties":{"name":"Shasta","meta":"USBR · 710 MW","anchor":"left"},"geometry":{"type":"Point","coordinates":[-122.418,40.720]}},
+    {"type":"Feature","properties":{"name":"Oroville","meta":"DWR · 819 MW","anchor":"left"},"geometry":{"type":"Point","coordinates":[-121.486,39.541]}},
+    {"type":"Feature","properties":{"name":"Glen Canyon","meta":"USBR · 1,320 MW","anchor":"right"},"geometry":{"type":"Point","coordinates":[-111.484,36.937]}},
+    {"type":"Feature","properties":{"name":"Hoover","meta":"USBR · 2,080 MW","anchor":"left"},"geometry":{"type":"Point","coordinates":[-114.737,36.016]}}
+  ]
+}

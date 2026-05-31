@@ -277,16 +277,295 @@ def _fmt_short_date(iso: str) -> str:
 # ══════════════════════════════════════════════════════════════════════
 
 def fetch_snotel_basin(huc: str) -> Optional[Dict[str, Any]]:
-    """NRCS AWDB — basin SWE % of median. Stub."""
-    return None
+    """
+    NRCS AWDB REST API v2 — basin-averaged SWE % of median for a HUC-6.
+
+    Strategy:
+    1. Query all active SNOTEL stations in the HUC-6.
+    2. For each station get today's WTEQ (snow water equiv, inches) and
+       the 1991-2020 median for the same calendar date.
+    3. Return basin-weighted average pct_median, mean swe_in, and 7-day delta.
+
+    Source: https://wcc.sc.egov.usda.gov/awdbRestApi/swagger-ui/index.html
+    """
+    today = datetime.date.today()
+    week_ago = today - datetime.timedelta(days=7)
+    base = "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1"
+
+    # Step 1: get station list for this HUC-6
+    station_url = f"{base}/stations"
+    params = {
+        "hucs": huc,
+        "networkCds": "SNTL",
+        "activeStationsOnly": "true",
+    }
+    stations = _http_get(station_url, params=params).json()
+    if not stations:
+        _log(f"    ⚠ SNOTEL {huc}: no stations found")
+        return None
+    triplets = [s["stationTriplet"] for s in stations]
+
+    # Step 2: fetch current WTEQ + 7-day-ago WTEQ for all stations
+    data_url = f"{base}/data"
+    def get_wteq(date_str):
+        p = {
+            "stationTriplets": ",".join(triplets),
+            "elementCd": "WTEQ",
+            "beginDate": date_str,
+            "endDate": date_str,
+            "duration": "DAILY",
+            "getFlags": "false",
+        }
+        rows = _http_get(data_url, params=p).json()
+        vals = {}
+        for row in rows:
+            v = row.get("values", [{}])
+            val = v[0].get("value") if v else None
+            if val is not None:
+                try:
+                    vals[row["stationTriplet"]] = float(val)
+                except (TypeError, ValueError):
+                    pass
+        return vals
+
+    today_wteq = get_wteq(today.isoformat())
+    week_wteq  = get_wteq(week_ago.isoformat())
+
+    if not today_wteq:
+        _log(f"    ⚠ SNOTEL {huc}: no WTEQ values returned")
+        return None
+
+    # Step 3: fetch 1991-2020 median for today's date
+    normals_url = f"{base}/stationElements"
+    valid_triplets = list(today_wteq.keys())
+    median_vals = {}
+    # Normals endpoint works per-station; batch with comma-separated triplets
+    norm_params = {
+        "stationTriplets": ",".join(valid_triplets),
+        "elementCd": "WTEQ",
+        "periodRef": "CURRENT",
+        "beginMonthDay": today.strftime("%m-%d"),
+        "endMonthDay": today.strftime("%m-%d"),
+        "duration": "DAILY",
+    }
+    try:
+        norm_rows = _http_get(normals_url, params=norm_params).json()
+        for row in norm_rows:
+            med = row.get("normalValue")
+            if med is not None:
+                try:
+                    median_vals[row["stationTriplet"]] = float(med)
+                except (TypeError, ValueError):
+                    pass
+    except Exception:
+        pass  # normals are best-effort; pct_median degrades gracefully
+
+    # Step 4: compute averages
+    swe_vals = list(today_wteq.values())
+    mean_swe = sum(swe_vals) / len(swe_vals)
+
+    # pct_median: average (obs/median)*100 across stations that have both
+    pct_list = []
+    for t, obs in today_wteq.items():
+        med = median_vals.get(t)
+        if med and med > 0:
+            pct_list.append(obs / med * 100)
+    pct_median = round(sum(pct_list) / len(pct_list)) if pct_list else None
+
+    # 7-day delta (% of median units — same calculation on week-ago values)
+    if week_wteq:
+        week_pct_list = []
+        for t, obs in week_wteq.items():
+            med = median_vals.get(t)
+            if med and med > 0:
+                week_pct_list.append(obs / med * 100)
+        if week_pct_list and pct_list:
+            week_pct = sum(week_pct_list) / len(week_pct_list)
+            delta_7d = round((sum(pct_list) / len(pct_list)) - week_pct, 1)
+        else:
+            delta_7d = None
+    else:
+        delta_7d = None
+
+    return {
+        "pct_median": pct_median,
+        "swe_in":     round(mean_swe, 1),
+        "delta_7d":   delta_7d,
+        "n_stations": len(swe_vals),
+        "as_of":      today.isoformat(),
+    }
+
 
 def fetch_cdec_sierra(region_id: str) -> Optional[Dict[str, Any]]:
-    """CDEC Sierra region SWE. Stub."""
+    """
+    CDEC (CA Dept of Water Resources) regional snow sensor data.
+    Uses the CDEC Water Data Library CSV export for regional SWE averages.
+
+    region_id maps to CDEC station group IDs:
+      NSF = North Fork Feather / Northern Sierra
+      CSF = Central Sierra (American)
+      SSF = Southern Sierra (San Joaquin)
+      TLR = Tulare (Kings/Kern)
+
+    CDEC publishes regional % of average SWE via:
+    https://cdec.water.ca.gov/cgi-progs/products/DLYSWE.html  (HTML, complex)
+
+    Alternative: CDEC snow sensor CSV endpoint for individual stations.
+    We use the CDO-style regional summaries at:
+    https://cdec.water.ca.gov/snow/current/snow/index.html
+
+    Practical note: CDEC's regional SWE % of average is also published
+    in a clean CSV at:
+    https://cdec.water.ca.gov/reportapp/javareports?name=PLOT_SWE
+    which returns HTML with embedded tables.
+
+    Cleanest machine-readable source: CDEC WSPF snow water content CSV:
+    https://cdec.water.ca.gov/cgi-progs/products/swcchart.csv
+    This returns a CSV with columns: Region, Current SWE (in), Average SWE (in), % of Average
+    Regions: NW, CN, SW (North, Central, South Sierra) + state total.
+    """
+    region_map = {
+        "NSF": "NW",
+        "CSF": "CN",
+        "SSF": "SW",
+        "TLR": "SW",  # Tulare falls in Southern Sierra aggregate
+    }
+    cdec_region = region_map.get(region_id)
+    if not cdec_region:
+        return None
+
+    url = "https://cdec.water.ca.gov/cgi-progs/products/swcchart.csv"
+    r = _http_get(url)
+    today = datetime.date.today()
+
+    # Parse CSV: skip comment lines, find header, then data rows
+    lines = [ln.strip() for ln in r.text.splitlines() if ln.strip()]
+    header_idx = None
+    for i, ln in enumerate(lines):
+        if "Region" in ln or "region" in ln.lower():
+            header_idx = i
+            break
+    if header_idx is None:
+        # Fallback: try parsing as fixed-width or comma-separated with positional logic
+        # Look for lines containing the region code
+        for ln in lines:
+            parts = [p.strip() for p in ln.split(",")]
+            if len(parts) >= 4 and parts[0].upper() == cdec_region:
+                try:
+                    swe_cur = float(parts[1])
+                    swe_avg = float(parts[2])
+                    pct = round(swe_cur / swe_avg * 100) if swe_avg else None
+                    return {
+                        "pct_median": pct,
+                        "swe_in":     round(swe_cur, 1),
+                        "delta_7d":   None,
+                        "n_stations": None,
+                        "as_of":      today.isoformat(),
+                    }
+                except (ValueError, ZeroDivisionError):
+                    pass
+        return None
+
+    headers = [h.strip().lower() for h in lines[header_idx].split(",")]
+    for ln in lines[header_idx + 1:]:
+        parts = [p.strip() for p in ln.split(",")]
+        if not parts or parts[0].upper() != cdec_region:
+            continue
+        try:
+            row = dict(zip(headers, parts))
+            # Column names vary by year; try common variants
+            cur_key  = next((k for k in row if "current" in k or "swe" in k and "avg" not in k), None)
+            avg_key  = next((k for k in row if "average" in k or "avg" in k), None)
+            pct_key  = next((k for k in row if "%" in k or "percent" in k), None)
+            swe_cur  = float(row[cur_key]) if cur_key else None
+            swe_avg  = float(row[avg_key]) if avg_key else None
+            pct_str  = row.get(pct_key, "").replace("%", "").strip()
+            pct      = int(float(pct_str)) if pct_str else (
+                       round(swe_cur / swe_avg * 100) if swe_cur and swe_avg and swe_avg > 0 else None)
+            return {
+                "pct_median": pct,
+                "swe_in":     round(swe_cur, 1) if swe_cur is not None else None,
+                "delta_7d":   None,
+                "n_stations": None,
+                "as_of":      today.isoformat(),
+            }
+        except (ValueError, TypeError, KeyError):
+            continue
     return None
 
+
 def fetch_bc_snow(region_id: str) -> Optional[Dict[str, Any]]:
-    """BC RFC automated snow weather stations. Stub."""
-    return None
+    """
+    BC River Forecast Centre automated snow weather station data.
+    BC RFC publishes a bulletin PDF (hard to parse) and an interactive map.
+    The cleanest machine-readable source is the BC RFC Snow Conditions CSV:
+    https://www.env.gov.bc.ca/wsd/data_searches/snow/asws/data/
+
+    For % of normal, we use the BC RFC Water Supply Bulletin data table
+    served from their public API. As a reliable fallback, we return None
+    and let the map show "no data" for BC basins (still renders correctly).
+
+    Implemented: query ASWS (Automated Snow Weather Stations) via:
+    https://www.env.gov.bc.ca/wsd/data_searches/snow/asws/data/current_conditions.csv
+    which has columns: Station, Basin, SWE(mm), %Normal, etc.
+    """
+    basin_map = {
+        "UCOL": ["Upper Columbia"],
+        "KOOT": ["Kootenay"],
+    }
+    target_basins = basin_map.get(region_id, [])
+    if not target_basins:
+        return None
+
+    url = "https://www.env.gov.bc.ca/wsd/data_searches/snow/asws/data/current_conditions.csv"
+    try:
+        r = _http_get(url)
+    except Exception:
+        return None
+
+    lines = [ln.strip() for ln in r.text.splitlines() if ln.strip()]
+    if len(lines) < 2:
+        return None
+
+    headers = [h.strip().lower().replace(" ", "_") for h in lines[0].split(",")]
+    basin_col  = next((i for i, h in enumerate(headers) if "basin" in h), None)
+    swe_col    = next((i for i, h in enumerate(headers) if "swe" in h and "%" not in h), None)
+    pct_col    = next((i for i, h in enumerate(headers) if "%" in h or "normal" in h or "median" in h), None)
+    if basin_col is None or pct_col is None:
+        return None
+
+    pct_list = []
+    swe_list = []
+    for ln in lines[1:]:
+        parts = [p.strip() for p in ln.split(",")]
+        if len(parts) <= max(filter(None, [basin_col, pct_col, swe_col])):
+            continue
+        basin_val = parts[basin_col].strip()
+        if not any(tb.lower() in basin_val.lower() for tb in target_basins):
+            continue
+        try:
+            pct = float(parts[pct_col].replace("%", ""))
+            pct_list.append(pct)
+        except (ValueError, IndexError):
+            pass
+        if swe_col is not None:
+            try:
+                swe_mm = float(parts[swe_col])
+                swe_list.append(swe_mm * 0.0394)  # mm → inches
+            except (ValueError, IndexError):
+                pass
+
+    if not pct_list:
+        return None
+
+    today = datetime.date.today()
+    return {
+        "pct_median": round(sum(pct_list) / len(pct_list)),
+        "swe_in":     round(sum(swe_list) / len(swe_list), 1) if swe_list else None,
+        "delta_7d":   None,
+        "n_stations": len(pct_list),
+        "as_of":      today.isoformat(),
+    }
 
 def fetch_nwrfc_wsf() -> Optional[Dict[str, Any]]:
     """NWRFC Apr–Sep water supply forecast at The Dalles. Stub."""
