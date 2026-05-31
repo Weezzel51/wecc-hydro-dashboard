@@ -1,9 +1,11 @@
 {
   "meta": {
-    "last_updated_pt": "2026-05-31 16:06 PT",
-    "next_update_pt": "2026-06-01 16:06 PT",
+    "last_updated_pt": "2026-05-31 16:23 PT",
+    "next_update_pt": "2026-06-01 16:23 PT",
     "sources_ok": [
-      "bpa_mix"
+      "bpa_mix",
+      "caiso",
+      "usace"
     ]
   },
   "basins": [],
@@ -14,8 +16,27 @@
     "wind_pct": 21,
     "thermal_pct": 14
   },
-  "usace": [],
-  "caiso": {},
+  "usace": [
+    {
+      "project": "Lower Granite",
+      "discharge_kcfs": 7.2,
+      "forebay_ft": 9.7,
+      "as_of": "2026-05-31"
+    },
+    {
+      "project": "The Dalles",
+      "discharge_kcfs": 210.0,
+      "forebay_ft": 77.8,
+      "as_of": "2026-05-31"
+    }
+  ],
+  "caiso": {
+    "hydro_mw": 1873,
+    "hydro_share_pct": 12,
+    "sp15_da": null,
+    "history": [],
+    "as_of": "2026-05-31"
+  },
   "archive": [
     {
       "issue": "ISSUE 09",
