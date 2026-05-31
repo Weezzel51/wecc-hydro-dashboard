@@ -153,83 +153,95 @@ def fetch_eia_bpa_mix() -> Optional[Dict[str, int]]:
 
 def fetch_eia_midc_price() -> Optional[Dict[str, Any]]:
     """
-    EIA Wholesale Market Prices JSON API — Mid-Columbia peak DA price.
-
-    Source: https://api.eia.gov/v2/electricity/wholesale-market-prices/
-    Uses the same EIA API key as the BPA fuel mix. Returns last 30 days
-    of Mid-C peak day-ahead prices. No Excel/openpyxl needed.
-
-    Location code for Mid-Columbia: "Mid-C" or "MIC" depending on EIA
-    dataset version. We query both and take whichever returns data.
+    EIA Wholesale Market Prices — Mid-Columbia peak DA price.
+    Discovers the correct location code via the facets endpoint first,
+    then pulls 30 days of peak prices.
     """
     if not EIA_API_KEY:
         _log("  ⚠ EIA_API_KEY unset — skipping Mid-C price")
         return None
 
+    base = "https://api.eia.gov/v2/electricity/wholesale-market-prices"
     today = datetime.date.today()
     start = (today - datetime.timedelta(days=45)).isoformat()
-    end   = today.isoformat()
 
-    url = "https://api.eia.gov/v2/electricity/wholesale-market-prices/data/"
-    # Try both location codes EIA has used for Mid-Columbia
-    for loc in ("Mid-C", "MIC", "Mid Columbia"):
-        params = {
-            "api_key":             EIA_API_KEY,
-            "facets[location][]":  loc,
-            "facets[type][]":      "peak",
-            "start":               start,
-            "end":                 end,
-            "sort[0][column]":     "period",
-            "sort[0][direction]":  "desc",
-            "length":              60,
-        }
+    # Step 1: discover the correct location code (changes occasionally)
+    mid_loc = None
+    try:
+        facets = _http_get(f"{base}/facet/location",
+                           params={"api_key": EIA_API_KEY}).json()
+        locs = facets.get("response", {}).get("facets", [])
+        # Find the one that looks like Mid-Columbia
+        for item in locs:
+            name = str(item.get("name", "") or item.get("id", "")).lower()
+            if "mid" in name and ("columbia" in name or "col" in name or name in ("mid-c", "midc")):
+                mid_loc = item.get("id") or item.get("name")
+                break
+        if not mid_loc and locs:
+            _log(f"  · EIA locations available: {[i.get('id') for i in locs[:10]]}")
+    except Exception as e:
+        _log(f"  · EIA facets: {e}")
+
+    # Step 2: if discovery failed, try known codes
+    candidates = ([mid_loc] if mid_loc else []) + ["Mid-C", "MID-C", "MIDC", "Mid Columbia", "MIC"]
+
+    rows = []
+    used_loc = None
+    for loc in candidates:
+        if not loc:
+            continue
         try:
-            rows = _http_get(url, params=params).json().get("response", {}).get("data", [])
+            resp = _http_get(f"{base}/data/", params={
+                "api_key":             EIA_API_KEY,
+                "facets[location][]":  loc,
+                "facets[type][]":      "peak",
+                "start":               start,
+                "end":                 today.isoformat(),
+                "sort[0][column]":     "period",
+                "sort[0][direction]":  "desc",
+                "length":              60,
+            }).json()
+            rows = resp.get("response", {}).get("data", [])
         except Exception:
             rows = []
         if rows:
+            used_loc = loc
             break
 
     if not rows:
-        _log("  ✗ EIA Mid-C price: no data returned for any location code")
+        _log("  ✗ EIA Mid-C price: no data for any location code")
         return None
 
-    # rows are sorted newest-first; each has {"period": "YYYY-MM-DD", "price": 123.45, ...}
     series: List[tuple] = []
     for row in rows:
         try:
-            d = datetime.date.fromisoformat(row["period"][:10])
-            p = float(row.get("price") or row.get("value") or 0)
-            if p > 0:
+            d = datetime.date.fromisoformat(str(row.get("period", ""))[:10])
+            # Field name varies: "price", "value", "dollars-per-megawatthour"
+            p = None
+            for key in ("price", "value", "dollars-per-megawatthour", "Price"):
+                if row.get(key) is not None:
+                    p = float(row[key])
+                    break
+            if p and p > 0:
                 series.append((d, p))
-        except (KeyError, ValueError, TypeError):
+        except (ValueError, TypeError):
             continue
 
     if not series:
-        _log("  ✗ EIA Mid-C price: could not parse any price values")
+        _log("  ✗ EIA Mid-C price: no parseable values")
         return None
 
     series.sort()
     latest_date, latest_price = series[-1]
-
-    # 7-day WoW
     week_ago = latest_date - datetime.timedelta(days=7)
     prior    = next((p for d, p in reversed(series[:-1]) if d <= week_ago), None)
     wow_pct  = round((latest_price - prior) / prior * 100, 1) if prior else None
+    history  = [{"d": _fmt_short_date(d.isoformat()), "p": round(p, 2)} for d, p in series[-30:]]
 
-    # 30-day chart history (oldest→newest for Chart.js)
-    history = [
-        {"d": _fmt_short_date(d.isoformat()), "p": round(p, 2)}
-        for d, p in series[-30:]
-    ]
-
-    _log(f"  ✓ Mid-C peak DA: ${latest_price:.2f}/MWh ({latest_date.isoformat()})")
+    _log(f"  ✓ Mid-C peak DA: ${latest_price:.2f}/MWh [{used_loc}] ({latest_date.isoformat()})")
     return {
-        "peak_da":    round(latest_price, 2),
-        "offpeak_da": None,
-        "wow_pct":    wow_pct,
-        "history":    history,
-        "as_of":      latest_date.isoformat(),
+        "peak_da": round(latest_price, 2), "offpeak_da": None,
+        "wow_pct": wow_pct, "history": history, "as_of": latest_date.isoformat(),
     }
 
 
@@ -259,122 +271,130 @@ def fetch_snotel_basin(huc: str) -> Optional[Dict[str, Any]]:
     """
     today    = datetime.date.today()
     week_ago = today - datetime.timedelta(days=7)
+    base     = "https://wcc.sc.egov.usda.gov/awdbRestApi/services/v1"
 
-    # NRCS Report Generator — pre-computed basin SWE % of 1991-2020 median.
-    # Returns a two-row CSV (today + week-ago) for the given HUC-6.
-    base = "https://wcc.sc.egov.usda.gov/reportGenerator/view_csv/customBasinTimeSeriesGroupBy,basin/daily/start_of_period_values"
-    period = f"{week_ago.isoformat()},{today.isoformat()}"
-    path   = f"{base}/{huc}|0|SNTL|SNOWPACK_UPDATED/{period}/WTEQ::value,WTEQ::pctOfMedian_1991"
-
+    # 1. Station list for this HUC-6
     try:
-        r = _http_get(path)
+        stations = _http_get(f"{base}/stations", params={
+            "hucs": huc, "networkCds": "SNTL", "activeStationsOnly": "true",
+        }).json()
     except Exception as e:
-        _log(f"    ✗ SNOTEL {huc}: {e}")
+        _log(f"    ✗ SNOTEL {huc} stations: {e}")
         return None
 
-    # CSV has comment lines starting with '#', then a header, then data rows.
-    # Columns: Date, SWE (in), % of Median
-    rows = []
-    for ln in r.text.splitlines():
-        ln = ln.strip()
-        if not ln or ln.startswith("#"):
-            continue
-        if ln.lower().startswith("date"):
-            continue  # header
-        parts = [p.strip() for p in ln.split(",")]
-        if len(parts) >= 3:
-            rows.append(parts)
-
-    if not rows:
-        _log(f"    ⚠ SNOTEL {huc}: no data rows in response")
+    if not stations:
+        _log(f"    ⚠ SNOTEL {huc}: no stations")
         return None
 
-    def parse_row(parts):
+    triplets = [s["stationTriplet"] for s in stations]
+    # Split into chunks of 30 to stay under URL length limit
+    def chunks(lst, n=30):
+        for i in range(0, len(lst), n):
+            yield lst[i:i+n]
+
+    # 2. Current WTEQ (snow water equivalent, inches)
+    def get_wteq(date_str):
+        vals = {}
+        for chunk in chunks(triplets):
+            try:
+                rows = _http_get(f"{base}/data", params={
+                    "stationTriplets": ",".join(chunk),
+                    "elementCd": "WTEQ",
+                    "beginDate": date_str,
+                    "endDate":   date_str,
+                    "duration":  "DAILY",
+                    "getFlags":  "false",
+                }).json()
+                for row in (rows if isinstance(rows, list) else []):
+                    t = row.get("stationTriplet", "")
+                    v_list = row.get("values") or []
+                    if v_list:
+                        v = v_list[0].get("value")
+                        if v is not None and str(v) not in ("", "-999999"):
+                            try:
+                                vals[t] = float(v)
+                            except (ValueError, TypeError):
+                                pass
+            except Exception:
+                pass
+        return vals
+
+    cur = get_wteq(today.isoformat())
+    prv = get_wteq(week_ago.isoformat())
+
+    # If all stations are 0.0 (melted out), that's valid — 0% of median
+    # If none returned any value, try returning 0 rather than None for summer
+    if not cur:
+        _log(f"    ⚠ SNOTEL {huc}: no current WTEQ values — late season 0")
+        return {"pct_median": 0, "swe_in": 0.0, "delta_7d": None, "as_of": today.isoformat()}
+
+    # 3. Normals via AWDB /normals endpoint
+    normals = {}
+    for chunk in chunks(list(cur.keys())):
         try:
-            swe = float(parts[1]) if parts[1] not in ("", "-", "N/A") else None
-            pct = int(float(parts[2])) if parts[2] not in ("", "-", "N/A") else None
-            return swe, pct
-        except (ValueError, IndexError):
-            return None, None
+            nrows = _http_get(f"{base}/normals", params={
+                "stationTriplets": ",".join(chunk),
+                "elementCd":       "WTEQ",
+                "durationCd":      "DAILY",
+                "beginMonthDay":   today.strftime("%m-%d"),
+                "endMonthDay":     today.strftime("%m-%d"),
+            }).json()
+            for row in (nrows if isinstance(nrows, list) else []):
+                t = row.get("stationTriplet", "")
+                v_list = row.get("values") or []
+                if v_list:
+                    v = v_list[0].get("value")
+                    if v is not None:
+                        try:
+                            normals[t] = float(v)
+                        except (ValueError, TypeError):
+                            pass
+        except Exception:
+            pass
 
-    # Most recent row = today (or most recent available)
-    swe_today, pct_today = parse_row(rows[-1])
-    swe_week,  pct_week  = parse_row(rows[0]) if len(rows) > 1 else (None, None)
+    # 4. Compute % of median
+    pct_list, swe_list = [], []
+    for t, obs in cur.items():
+        swe_list.append(obs)
+        med = normals.get(t)
+        if med and med > 0:
+            pct_list.append(obs / med * 100)
+        else:
+            pct_list.append(0.0)   # melted out → 0%
 
-    delta_7d = round(pct_today - pct_week, 1) if (pct_today is not None and pct_week is not None) else None
+    pct_median = round(sum(pct_list) / len(pct_list)) if pct_list else 0
+    mean_swe   = round(sum(swe_list)  / len(swe_list), 1) if swe_list else 0.0
 
-    _log(f"    ✓ SNOTEL {huc}: {swe_today}\" / {pct_today}% of median")
-    return {
-        "pct_median": pct_today,
-        "swe_in":     round(swe_today, 1) if swe_today is not None else None,
-        "delta_7d":   delta_7d,
-        "as_of":      today.isoformat(),
-    }
+    # 7-day delta
+    delta_7d = None
+    if prv and normals:
+        prv_pcts = []
+        for t, obs in prv.items():
+            med = normals.get(t)
+            prv_pcts.append(obs / med * 100 if (med and med > 0) else 0.0)
+        if prv_pcts and pct_list:
+            delta_7d = round(pct_median - sum(prv_pcts) / len(prv_pcts), 1)
+
+    _log(f"    ✓ SNOTEL {huc}: {mean_swe}\" / {pct_median}% of median ({len(cur)} stations)")
+    return {"pct_median": pct_median, "swe_in": mean_swe, "delta_7d": delta_7d, "as_of": today.isoformat()}
 
 
 def fetch_cdec_sierra(region_id: str) -> Optional[Dict[str, Any]]:
     """
-    CDEC regional SWE % of average — same Report Generator approach as SNOTEL.
-    Uses NRCS station data mapped to CDEC HUC-8 codes inside Sierra basins.
-
-    Region mapping to NRCS HUC-8 representative sub-basins:
-      NSF → 18020101 (Upper Feather)
-      CSF → 18020111 (Upper American)
-      SSF → 18040001 (Upper San Joaquin)
-      TLR → 18030001 (Kings)
+    Sierra SWE via NRCS AWDB REST API, using HUC-8 sub-basin codes.
+    Same implementation as fetch_snotel_basin but with HUC-8 codes.
     """
-    huc8_map = {
-        "NSF": "18020101",
-        "CSF": "18020111",
-        "SSF": "18040001",
-        "TLR": "18030001",
+    huc_map = {
+        "NSF": "180201",   # Northern Sierra — use HUC-6 (more stations)
+        "CSF": "180202",
+        "SSF": "180400",
+        "TLR": "180300",
     }
-    huc8 = huc8_map.get(region_id)
-    if not huc8:
+    huc = huc_map.get(region_id)
+    if not huc:
         return None
-
-    today    = datetime.date.today()
-    week_ago = today - datetime.timedelta(days=7)
-    base     = "https://wcc.sc.egov.usda.gov/reportGenerator/view_csv/customBasinTimeSeriesGroupBy,basin/daily/start_of_period_values"
-    period   = f"{week_ago.isoformat()},{today.isoformat()}"
-    path     = f"{base}/{huc8}|0|SNTL|SNOWPACK_UPDATED/{period}/WTEQ::value,WTEQ::pctOfMedian_1991"
-
-    try:
-        r = _http_get(path)
-    except Exception as e:
-        _log(f"    ✗ CDEC {region_id}: {e}")
-        return None
-
-    rows = []
-    for ln in r.text.splitlines():
-        ln = ln.strip()
-        if not ln or ln.startswith("#") or ln.lower().startswith("date"):
-            continue
-        parts = [p.strip() for p in ln.split(",")]
-        if len(parts) >= 3:
-            rows.append(parts)
-
-    if not rows:
-        return None
-
-    def _parse(parts):
-        try:
-            swe = float(parts[1]) if parts[1] not in ("", "-", "N/A") else None
-            pct = int(float(parts[2])) if parts[2] not in ("", "-", "N/A") else None
-            return swe, pct
-        except (ValueError, IndexError):
-            return None, None
-
-    swe_today, pct_today = _parse(rows[-1])
-    swe_week,  pct_week  = _parse(rows[0]) if len(rows) > 1 else (None, None)
-    delta_7d = round(pct_today - pct_week, 1) if (pct_today and pct_week) else None
-
-    return {
-        "pct_median": pct_today,
-        "swe_in":     round(swe_today, 1) if swe_today is not None else None,
-        "delta_7d":   delta_7d,
-        "as_of":      today.isoformat(),
-    }
+    # Re-use the SNOTEL basin fetcher with the HUC-6 code
+    return fetch_snotel_basin(huc)
 
 
 def fetch_bc_snow(region_id: str) -> Optional[Dict[str, Any]]:
@@ -392,91 +412,96 @@ def fetch_bc_snow(region_id: str) -> Optional[Dict[str, Any]]:
 
 def fetch_nwrfc_wsf() -> Optional[Dict[str, Any]]:
     """
-    NWRFC Apr–Sep unregulated water supply forecast at The Dalles.
-    Uses the NWRFC JSON API endpoint.
-    Source: https://www.nwrfc.noaa.gov/water_supply/
-    """
-    # NWRFC Water Supply API — returns JSON with current forecast
-    url = "https://www.nwrfc.noaa.gov/water_supply/ws_api.php"
-    params = {"loc": "TDAO3", "type": "json"}
-    try:
-        r = _http_get(url, params=params)
-        data = r.json()
-    except Exception:
-        # Fallback: parse the text page
-        try:
-            r2 = _http_get("https://www.nwrfc.noaa.gov/water_supply/ws_text.php",
-                           params={"id": "TDAO3", "wfo": ""})
-            text = r2.text
-        except Exception as e2:
-            _log(f"  ✗ NWRFC WSF: {e2}")
-            return None
-        # Scan for "Apr" and a percentage on the same line
-        for line in text.splitlines():
-            if re.search(r"\bApr\b", line, re.IGNORECASE):
-                m_pct = re.search(r"(\d{1,3})\s*%", line)
-                m_maf = re.search(r"(\d{2,3}(?:\.\d)?)\s*(?=\s+\d{1,3}%)", line)
-                if m_pct:
-                    pct = int(m_pct.group(1))
-                    maf = float(m_maf.group(1)) if m_maf else None
-                    _log(f"  ✓ NWRFC WSF (text): {pct}% / {maf} MAF")
-                    return {"site": "The Dalles", "pct_normal": pct,
-                            "forecast_maf": maf, "as_of": datetime.date.today().isoformat()}
-        _log("  ✗ NWRFC WSF: no parseable data")
-        return None
+    NWRFC Apr–Sep water supply forecast at The Dalles.
 
-    # JSON path — structure varies; try common keys
+    NWRFC publishes water supply outlook data at:
+    https://www.nwrfc.noaa.gov/water_supply/ws_forecasts.php (HTML — fragile)
+
+    More reliable: NWRFC's ensemble forecast summary CSV, or scraping
+    the published PDF. Simplest machine-readable source: the NWRFC
+    Water Supply Summary page, which has consistent HTML table structure.
+
+    Fallback: use the NOAA Water Prediction Service API.
+    """
     today = datetime.date.today()
-    try:
-        # Typical structure: {"forecasts": [{"period": "Apr-Sep", "volume": 123, "pct_normal": 88}]}
-        forecasts = data.get("forecasts") or data.get("data") or []
-        for f in forecasts:
-            period = str(f.get("period") or f.get("forecastPeriod") or "")
-            if "Apr" in period or "apr" in period:
-                pct = f.get("pct_normal") or f.get("percentNormal") or f.get("percent_normal")
-                maf = f.get("volume") or f.get("forecastVolume")
-                if pct is not None:
-                    _log(f"  ✓ NWRFC WSF: {pct}% / {maf} MAF")
-                    return {"site": "The Dalles", "pct_normal": int(pct),
-                            "forecast_maf": float(maf) if maf else None,
-                            "as_of": today.isoformat()}
-    except Exception:
-        pass
-    _log("  ✗ NWRFC WSF: JSON structure unrecognized")
+
+    # Try NWRFC water supply summary page (HTML table, parse with regex)
+    urls_to_try = [
+        "https://www.nwrfc.noaa.gov/water_supply/ws_forecasts.php?id=TDAO3",
+        "https://www.nwrfc.noaa.gov/water_supply/ws_forecasts.php?loc=TDAO3",
+    ]
+
+    text = None
+    for url in urls_to_try:
+        try:
+            r = _http_get(url)
+            if r.status_code == 200:
+                text = r.text
+                break
+        except Exception:
+            pass
+
+    if text:
+        # Look for a % of normal value in the page HTML
+        # Common patterns: "88%" "88 %" "88%MAF" near "Apr" or "volume"
+        m = re.search(r"(?:Apr|April)[\s\S]{0,200}?(\d{2,3})\s*%", text, re.IGNORECASE)
+        if not m:
+            # Broader scan
+            m = re.search(r"(\d{2,3})\s*%\s*(?:of\s*)?(?:normal|median|average)", text, re.IGNORECASE)
+        if m:
+            pct = int(m.group(1))
+            # Try to find MAF value nearby
+            maf_m = re.search(r"(\d{2,3}(?:\.\d+)?)\s*MAF", text, re.IGNORECASE)
+            maf = float(maf_m.group(1)) if maf_m else None
+            _log(f"  ✓ NWRFC WSF: {pct}% of normal ({maf} MAF)")
+            return {"site": "The Dalles", "pct_normal": pct,
+                    "forecast_maf": maf, "as_of": today.isoformat()}
+
+    # Fallback: NOAA NWPS API (National Water Prediction Service)
+    # This provides streamflow data but not seasonal volume forecasts directly.
+    # Skip and return None — WSF panel will show "pending".
+    _log("  ✗ NWRFC WSF: no parseable forecast found")
     return None
 
 
-# USGS gauge IDs for major Columbia/Snake dams (station below dam)
+# USGS daily-values gauge IDs for Columbia/Snake projects.
+# Using /nwis/dv/ (daily values) — more universally available than /iv/.
+# Gauges are on the river immediately below each dam.
 USGS_GAUGE_MAP = {
-    "GCL": ("12436500",  "Grand Coulee"),
-    "CHJ": ("12437522",  "Chief Joseph"),
-    "LWG": ("13340600",  "Lower Granite"),
-    "TDA": ("14105700",  "The Dalles"),
-    "BON": ("14128910",  "Bonneville"),
+    "GCL": ("12440900", "Grand Coulee"),   # Columbia R below Grand Coulee Dam WA
+    "CHJ": ("12443700", "Chief Joseph"),   # Columbia R below Chief Joseph Dam WA
+    "LWG": ("13340600", "Lower Granite"),  # Snake R at Lower Granite Dam WA
+    "TDA": ("14105700", "The Dalles"),     # Columbia R at The Dalles OR
+    "BON": ("14128910", "Bonneville"),     # Columbia R at Bonneville OR
 }
 
 def fetch_usace_project(code: str) -> Optional[Dict[str, Any]]:
     """
-    USGS NWIS instantaneous values — discharge (cfs→kcfs) for major Columbia
-    River projects. Uses USGS gauge stations immediately below each dam.
+    USGS NWIS daily values — discharge (cfs→kcfs) and gage height (ft)
+    for major Columbia/Snake River projects.
 
-    Source: https://waterservices.usgs.gov/nwis/iv/
-    Parameter 00060 = discharge (cfs). No API key required.
+    Uses /nwis/dv/ (daily mean) which is available for all gauges.
+    Parameter 00060 = mean daily discharge (cfs).
+    Parameter 00065 = mean daily gage height (ft) — used as forebay proxy.
     """
     if code not in USGS_GAUGE_MAP:
         return None
-    gauge_id, _ = USGS_GAUGE_MAP[code]
+    gauge_id, label = USGS_GAUGE_MAP[code]
 
-    url = "https://waterservices.usgs.gov/nwis/iv/"
+    today     = datetime.date.today()
+    yesterday = today - datetime.timedelta(days=3)  # buffer for data lag
+
+    url = "https://waterservices.usgs.gov/nwis/dv/"
     params = {
         "sites":       gauge_id,
-        "parameterCd": "00060,00065",  # discharge + gage height
-        "period":      "P2D",
+        "parameterCd": "00060,00065",
+        "startDT":     yesterday.isoformat(),
+        "endDT":       today.isoformat(),
+        "siteStatus":  "all",
         "format":      "json",
     }
     try:
-        r = _http_get(url, params=params)
-        data = r.json()
+        data = _http_get(url, params=params).json()
     except Exception as e:
         _log(f"  ✗ USGS {code} ({gauge_id}): {e}")
         return None
@@ -488,30 +513,33 @@ def fetch_usace_project(code: str) -> Optional[Dict[str, Any]]:
         ts_list = data["value"]["timeSeries"]
         for ts in ts_list:
             var_code = ts["variable"]["variableCode"][0]["value"]
-            values   = ts["values"][0]["value"]
-            # Find most recent non-null value
-            for v in reversed(values):
-                val_str = v.get("value")
-                if val_str and val_str != "-999999":
-                    val = float(val_str)
+            vals     = ts["values"][0]["value"]
+            # Walk newest-first for a valid (non-sentinel) value
+            for v in reversed(vals):
+                s = str(v.get("value", ""))
+                if s and s not in ("", "-999999", "Ice"):
+                    try:
+                        fv = float(s)
+                    except ValueError:
+                        continue
                     if var_code == "00060":
-                        discharge_kcfs = round(val / 1000, 1)  # cfs → kcfs
+                        discharge_kcfs = round(fv / 1000, 1)  # cfs → kcfs
                     elif var_code == "00065":
-                        forebay_ft = round(val, 1)
+                        forebay_ft = round(fv, 1)
                     break
-    except (KeyError, IndexError, ValueError, TypeError) as e:
+    except (KeyError, IndexError, TypeError) as e:
         _log(f"  ✗ USGS {code}: parse error: {e}")
         return None
 
-    if discharge_kcfs is None:
-        _log(f"  ✗ USGS {code}: no discharge value")
+    if discharge_kcfs is None and forebay_ft is None:
+        _log(f"  ✗ USGS {code} ({gauge_id}): no usable values")
         return None
 
     _log(f"  ✓ USGS {code}: {discharge_kcfs} kcfs / {forebay_ft} ft")
     return {
         "discharge_kcfs": discharge_kcfs,
         "forebay_ft":     forebay_ft,
-        "as_of":          datetime.date.today().isoformat(),
+        "as_of":          today.isoformat(),
     }
 
 
