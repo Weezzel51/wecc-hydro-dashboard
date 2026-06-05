@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-06-04 09:20 PT",
-    "next_update_pt": "2026-06-05 09:20 PT",
+    "last_updated_pt": "2026-06-05 08:54 PT",
+    "next_update_pt": "2026-06-06 08:54 PT",
     "sources_ok": [
       "bpa_mix",
       "wsf",
@@ -16,118 +16,118 @@
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Pend Oreille",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Yakima",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Clearwater",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Salmon",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Upper Snake",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Lower Snake",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Owyhee",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Lower Columbia",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Northern Sierra (Feather)",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Southern Sierra (San Joaq.)",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "name": "Tulare (Kings/Kern)",
       "pct_median": 0,
       "swe_in": 0.0,
       "delta_7d": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     }
   ],
   "wsf": {
     "site": "The Dalles",
     "pct_normal": 10,
     "forecast_maf": null,
-    "as_of": "2026-06-04"
+    "as_of": "2026-06-05"
   },
   "midc": {},
   "bpa_mix": {
-    "hydro_pct": 80,
-    "wind_pct": 8,
+    "hydro_pct": 74,
+    "wind_pct": 14,
     "thermal_pct": 12
   },
   "usace": [
     {
       "project": "Lower Granite",
-      "discharge_kcfs": 5.4,
+      "discharge_kcfs": 5.3,
       "forebay_ft": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     },
     {
       "project": "The Dalles",
-      "discharge_kcfs": 237.0,
+      "discharge_kcfs": 217.0,
       "forebay_ft": null,
-      "as_of": "2026-06-04"
+      "as_of": "2026-06-05"
     }
   ],
   "caiso": {
-    "hydro_mw": 2958,
-    "hydro_share_pct": 14,
+    "hydro_mw": 2918,
+    "hydro_share_pct": 15,
     "sp15_da": null,
     "history": [],
-    "as_of": "2026-06-04"
+    "as_of": "2026-06-05"
   },
   "archive": [
     {
