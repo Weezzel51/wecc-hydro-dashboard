@@ -23,9 +23,8 @@ import sys
 import json
 import re
 import datetime
-import urllib.parse
 from pathlib import Path
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Tuple
 from xml.etree import ElementTree as ET
 
 import requests
@@ -151,100 +150,6 @@ def fetch_eia_bpa_mix() -> Optional[Dict[str, int]]:
     }
 
 
-def fetch_eia_midc_price() -> Optional[Dict[str, Any]]:
-    """
-    EIA Wholesale Market Prices — Mid-Columbia peak DA price.
-    Discovers the correct location code via the facets endpoint first,
-    then pulls 30 days of peak prices.
-    """
-    if not EIA_API_KEY:
-        _log("  ⚠ EIA_API_KEY unset — skipping Mid-C price")
-        return None
-
-    base = "https://api.eia.gov/v2/electricity/wholesale-market-prices"
-    today = datetime.date.today()
-    start = (today - datetime.timedelta(days=45)).isoformat()
-
-    # Step 1: discover the correct location code (changes occasionally)
-    mid_loc = None
-    try:
-        facets = _http_get(f"{base}/facet/location",
-                           params={"api_key": EIA_API_KEY}).json()
-        locs = facets.get("response", {}).get("facets", [])
-        # Find the one that looks like Mid-Columbia
-        for item in locs:
-            name = str(item.get("name", "") or item.get("id", "")).lower()
-            if "mid" in name and ("columbia" in name or "col" in name or name in ("mid-c", "midc")):
-                mid_loc = item.get("id") or item.get("name")
-                break
-        if not mid_loc and locs:
-            _log(f"  · EIA locations available: {[i.get('id') for i in locs[:10]]}")
-    except Exception as e:
-        _log(f"  · EIA facets: {e}")
-
-    # Step 2: if discovery failed, try known codes
-    candidates = ([mid_loc] if mid_loc else []) + ["Mid-C", "MID-C", "MIDC", "Mid Columbia", "MIC"]
-
-    rows = []
-    used_loc = None
-    for loc in candidates:
-        if not loc:
-            continue
-        try:
-            resp = _http_get(f"{base}/data/", params={
-                "api_key":             EIA_API_KEY,
-                "facets[location][]":  loc,
-                "facets[type][]":      "peak",
-                "start":               start,
-                "end":                 today.isoformat(),
-                "sort[0][column]":     "period",
-                "sort[0][direction]":  "desc",
-                "length":              60,
-            }).json()
-            rows = resp.get("response", {}).get("data", [])
-        except Exception:
-            rows = []
-        if rows:
-            used_loc = loc
-            break
-
-    if not rows:
-        _log("  ✗ EIA Mid-C price: no data for any location code")
-        return None
-
-    series: List[tuple] = []
-    for row in rows:
-        try:
-            d = datetime.date.fromisoformat(str(row.get("period", ""))[:10])
-            # Field name varies: "price", "value", "dollars-per-megawatthour"
-            p = None
-            for key in ("price", "value", "dollars-per-megawatthour", "Price"):
-                if row.get(key) is not None:
-                    p = float(row[key])
-                    break
-            if p and p > 0:
-                series.append((d, p))
-        except (ValueError, TypeError):
-            continue
-
-    if not series:
-        _log("  ✗ EIA Mid-C price: no parseable values")
-        return None
-
-    series.sort()
-    latest_date, latest_price = series[-1]
-    week_ago = latest_date - datetime.timedelta(days=7)
-    prior    = next((p for d, p in reversed(series[:-1]) if d <= week_ago), None)
-    wow_pct  = round((latest_price - prior) / prior * 100, 1) if prior else None
-    history  = [{"d": _fmt_short_date(d.isoformat()), "p": round(p, 2)} for d, p in series[-30:]]
-
-    _log(f"  ✓ Mid-C peak DA: ${latest_price:.2f}/MWh [{used_loc}] ({latest_date.isoformat()})")
-    return {
-        "peak_da": round(latest_price, 2), "offpeak_da": None,
-        "wow_pct": wow_pct, "history": history, "as_of": latest_date.isoformat(),
-    }
-
-
 def _fmt_short_date(iso: str) -> str:
     d = datetime.date.fromisoformat(iso[:10])
     return d.strftime("%b %-d") if sys.platform != "win32" else d.strftime("%b %#d")
@@ -276,7 +181,7 @@ def fetch_snotel_basin(huc: str) -> Optional[Dict[str, Any]]:
     # 1. Station list for this HUC-6
     try:
         stations = _http_get(f"{base}/stations", params={
-            "hucs": huc, "networkCds": "SNTL", "activeStationsOnly": "true",
+            "hucs": huc, "elements": "WTEQ", "activeStationsOnly": "true",
         }).json()
     except Exception as e:
         _log(f"    ✗ SNOTEL {huc} stations: {e}")
@@ -286,97 +191,122 @@ def fetch_snotel_basin(huc: str) -> Optional[Dict[str, Any]]:
         _log(f"    ⚠ SNOTEL {huc}: no stations")
         return None
 
-    triplets = [s["stationTriplet"] for s in stations]
+    triplets = [
+        s["stationTriplet"] for s in stations
+        if s.get("networkCode") in ("SNTL", "SNTLT") and s.get("stationTriplet")
+    ]
+    if not triplets:
+        _log(f"    ⚠ SNOTEL {huc}: no active SNOTEL stations with WTEQ")
+        return None
     # Split into chunks of 30 to stay under URL length limit
     def chunks(lst, n=30):
         for i in range(0, len(lst), n):
             yield lst[i:i+n]
 
     # 2. Current WTEQ (snow water equivalent, inches)
-    def get_wteq(date_str):
-        vals = {}
+    def get_wteq(begin_date: datetime.date, end_date: datetime.date) -> Tuple[Dict[str, Dict[str, Optional[float]]], Optional[datetime.date]]:
+        latest_by_station: Dict[str, Tuple[datetime.date, Dict[str, Optional[float]]]] = {}
         for chunk in chunks(triplets):
             try:
                 rows = _http_get(f"{base}/data", params={
                     "stationTriplets": ",".join(chunk),
-                    "elementCd": "WTEQ",
-                    "beginDate": date_str,
-                    "endDate":   date_str,
+                    "elements": "WTEQ",
+                    "beginDate": begin_date.isoformat(),
+                    "endDate":   end_date.isoformat(),
                     "duration":  "DAILY",
-                    "getFlags":  "false",
+                    "periodRef": "END",
+                    "centralTendencyType": "MEDIAN",
+                    "returnFlags": "false",
+                    "returnOriginalValues": "false",
+                    "returnSuspectData": "false",
                 }).json()
                 for row in (rows if isinstance(rows, list) else []):
                     t = row.get("stationTriplet", "")
-                    v_list = row.get("values") or []
-                    if v_list:
-                        v = v_list[0].get("value")
-                        if v is not None and str(v) not in ("", "-999999"):
-                            try:
-                                vals[t] = float(v)
-                            except (ValueError, TypeError):
-                                pass
+                    for series in row.get("data") or []:
+                        peak = (series.get("timingCentralTendencies") or {}).get("medianPeak") or {}
+                        peak_median = peak.get("value")
+                        for item in series.get("values") or []:
+                            v = item.get("value")
+                            if v is not None and str(v) not in ("", "-999999"):
+                                try:
+                                    obs_date = datetime.date.fromisoformat(str(item.get("date", ""))[:10])
+                                    fv = float(v)
+                                    daily_median = item.get("median")
+                                    daily_median = float(daily_median) if daily_median is not None else None
+                                    peak_val = float(peak_median) if peak_median is not None else None
+                                except (ValueError, TypeError):
+                                    continue
+                                if t not in latest_by_station or obs_date > latest_by_station[t][0]:
+                                    latest_by_station[t] = (obs_date, {
+                                        "swe": fv,
+                                        "daily_median": daily_median,
+                                        "peak_median": peak_val,
+                                    })
             except Exception:
                 pass
-        return vals
+        if not latest_by_station:
+            return {}, None
+        latest_date = max(d for d, _ in latest_by_station.values())
+        vals = {t: v for t, (d, v) in latest_by_station.items() if d == latest_date}
+        return vals, latest_date
 
-    cur = get_wteq(today.isoformat())
-    prv = get_wteq(week_ago.isoformat())
+    cur, cur_date = get_wteq(today - datetime.timedelta(days=10), today)
+    prv, prv_date = get_wteq(week_ago - datetime.timedelta(days=10), week_ago)
 
-    # If all stations are 0.0 (melted out), that's valid — 0% of median
-    # If none returned any value, try returning 0 rather than None for summer
     if not cur:
-        _log(f"    ⚠ SNOTEL {huc}: no current WTEQ values — late season 0")
-        return {"pct_median": 0, "swe_in": 0.0, "delta_7d": None, "as_of": today.isoformat()}
+        _log(f"    ⚠ SNOTEL {huc}: no WTEQ values in trailing window")
+        return None
 
-    # 3. Normals via AWDB /normals endpoint
-    normals = {}
-    for chunk in chunks(list(cur.keys())):
-        try:
-            nrows = _http_get(f"{base}/normals", params={
-                "stationTriplets": ",".join(chunk),
-                "elementCd":       "WTEQ",
-                "durationCd":      "DAILY",
-                "beginMonthDay":   today.strftime("%m-%d"),
-                "endMonthDay":     today.strftime("%m-%d"),
-            }).json()
-            for row in (nrows if isinstance(nrows, list) else []):
-                t = row.get("stationTriplet", "")
-                v_list = row.get("values") or []
-                if v_list:
-                    v = v_list[0].get("value")
-                    if v is not None:
-                        try:
-                            normals[t] = float(v)
-                        except (ValueError, TypeError):
-                            pass
-        except Exception:
-            pass
-
-    # 4. Compute % of median
+    # 3. Compute % of median. After the median melt-out date, daily median
+    # SWE is 0.0, so use median seasonal peak SWE as the late-season basis.
     pct_list, swe_list = [], []
-    for t, obs in cur.items():
-        swe_list.append(obs)
-        med = normals.get(t)
+    basis_counts = {"daily": 0, "peak": 0}
+    for obs in cur.values():
+        swe = obs.get("swe")
+        if swe is None:
+            continue
+        swe_list.append(swe)
+        med = obs.get("daily_median")
         if med and med > 0:
-            pct_list.append(obs / med * 100)
-        else:
-            pct_list.append(0.0)   # melted out → 0%
+            pct_list.append(swe / med * 100)
+            basis_counts["daily"] += 1
+            continue
+        peak = obs.get("peak_median")
+        if peak and peak > 0:
+            pct_list.append(swe / peak * 100)
+            basis_counts["peak"] += 1
 
-    pct_median = round(sum(pct_list) / len(pct_list)) if pct_list else 0
+    pct_median = round(sum(pct_list) / len(pct_list)) if pct_list else None
     mean_swe   = round(sum(swe_list)  / len(swe_list), 1) if swe_list else 0.0
+    pct_basis = "daily_median" if basis_counts["daily"] >= basis_counts["peak"] else "median_peak"
+    season_status = "melted_out" if mean_swe == 0 else ("residual_snowpack" if pct_basis == "median_peak" else "active_snowpack")
 
     # 7-day delta
     delta_7d = None
-    if prv and normals:
+    if prv:
         prv_pcts = []
-        for t, obs in prv.items():
-            med = normals.get(t)
-            prv_pcts.append(obs / med * 100 if (med and med > 0) else 0.0)
+        for obs in prv.values():
+            swe = obs.get("swe")
+            if swe is None:
+                continue
+            med = obs.get("daily_median")
+            peak = obs.get("peak_median")
+            if med and med > 0:
+                prv_pcts.append(swe / med * 100)
+            elif peak and peak > 0:
+                prv_pcts.append(swe / peak * 100)
         if prv_pcts and pct_list:
             delta_7d = round(pct_median - sum(prv_pcts) / len(prv_pcts), 1)
 
-    _log(f"    ✓ SNOTEL {huc}: {mean_swe}\" / {pct_median}% of median ({len(cur)} stations)")
-    return {"pct_median": pct_median, "swe_in": mean_swe, "delta_7d": delta_7d, "as_of": today.isoformat()}
+    _log(f"    ✓ SNOTEL {huc}: {mean_swe}\" / {pct_median if pct_median is not None else 'n/a'}% ({pct_basis}, {len(cur)} stations, {cur_date})")
+    return {
+        "pct_median": pct_median,
+        "pct_basis": pct_basis,
+        "swe_in": mean_swe,
+        "delta_7d": delta_7d,
+        "season_status": season_status,
+        "as_of": cur_date.isoformat() if cur_date else today.isoformat(),
+    }
 
 
 def fetch_cdec_sierra(region_id: str) -> Optional[Dict[str, Any]]:
@@ -794,7 +724,6 @@ def main() -> int:
     # Tier-1 markets
     _log("Markets:")
     bpa_mix = _safe(fetch_eia_bpa_mix,   "EIA-930 BPA")
-    midc    = _safe(fetch_eia_midc_price, "EIA ICE bulk XLS Mid-C")
     wsf     = _safe(fetch_nwrfc_wsf,      "NWRFC WSF")
 
     # Ops
@@ -813,14 +742,13 @@ def main() -> int:
             "last_updated_pt": now.strftime("%Y-%m-%d %H:%M PT"),
             "next_update_pt":  (now + datetime.timedelta(days=1)).strftime("%Y-%m-%d %H:%M PT"),
             "sources_ok": [k for k, v in {
-                "bpa_mix": bpa_mix, "midc": midc, "wsf": wsf,
+                "bpa_mix": bpa_mix, "wsf": wsf,
                 "caiso": caiso, "usace": bool(usace_rows),
                 "basins": bool(basins),
             }.items() if v],
         },
         "basins":  basins,
         "wsf":     wsf or {},
-        "midc":    midc or {},
         "bpa_mix": bpa_mix or {},
         "usace":   usace_rows,
         "caiso":   caiso or {},

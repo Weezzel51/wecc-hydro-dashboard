@@ -13,87 +13,102 @@
   "basins": [
     {
       "name": "Upper Columbia (US)",
-      "pct_median": 0,
-      "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "pct_median": 5,
+      "pct_basis": "median_peak",
+      "swe_in": 0.2,
+      "delta_7d": 3.9,
+      "season_status": "residual_snowpack",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Pend Oreille",
-      "pct_median": 0,
-      "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "pct_median": 21,
+      "pct_basis": "median_peak",
+      "swe_in": 4.0,
+      "delta_7d": -1.1,
+      "season_status": "residual_snowpack",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Yakima",
       "pct_median": 0,
-      "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "pct_basis": "median_peak",
+      "swe_in": 0.1,
+      "delta_7d": -2.6,
+      "season_status": "residual_snowpack",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Clearwater",
-      "pct_median": 0,
-      "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "pct_median": 18,
+      "pct_basis": "daily_median",
+      "swe_in": 3.5,
+      "delta_7d": 0.2,
+      "season_status": "active_snowpack",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Salmon",
       "pct_median": 0,
+      "pct_basis": "median_peak",
       "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "delta_7d": -1.9,
+      "season_status": "melted_out",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Upper Snake",
-      "pct_median": 0,
-      "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "pct_median": 8,
+      "pct_basis": "median_peak",
+      "swe_in": 1.8,
+      "delta_7d": 1.2,
+      "season_status": "residual_snowpack",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Lower Snake",
       "pct_median": 0,
+      "pct_basis": "median_peak",
       "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "delta_7d": 0.0,
+      "season_status": "melted_out",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Owyhee",
-      "pct_median": 0,
-      "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "pct_median": 2,
+      "pct_basis": "median_peak",
+      "swe_in": 0.2,
+      "delta_7d": -0.4,
+      "season_status": "residual_snowpack",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Lower Columbia",
       "pct_median": 0,
+      "pct_basis": "median_peak",
       "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "delta_7d": 0.0,
+      "season_status": "melted_out",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Northern Sierra (Feather)",
       "pct_median": 0,
+      "pct_basis": "median_peak",
       "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "delta_7d": -41.7,
+      "season_status": "melted_out",
+      "as_of": "2026-06-04"
     },
     {
       "name": "Southern Sierra (San Joaq.)",
       "pct_median": 0,
+      "pct_basis": "daily_median",
       "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
-    },
-    {
-      "name": "Tulare (Kings/Kern)",
-      "pct_median": 0,
-      "swe_in": 0.0,
-      "delta_7d": null,
-      "as_of": "2026-06-05"
+      "delta_7d": 0.0,
+      "season_status": "melted_out",
+      "as_of": "2026-06-04"
     }
   ],
   "wsf": {
@@ -102,7 +117,6 @@
     "forecast_maf": null,
     "as_of": "2026-06-05"
   },
-  "midc": {},
   "bpa_mix": {
     "hydro_pct": 74,
     "wind_pct": 14,

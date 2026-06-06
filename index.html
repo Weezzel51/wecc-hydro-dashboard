@@ -184,7 +184,7 @@
         <div class="map-tooltip" id="map-tooltip"></div>
       </div>
       <div class="map-legend">
-        <div class="legend-item"><div class="legend-swatch low"></div>&lt;50% median</div>
+        <div class="legend-item"><div class="legend-swatch low"></div>&lt;50% basis</div>
         <div class="legend-item"><div class="legend-swatch mid"></div>50–74%</div>
         <div class="legend-item"><div class="legend-swatch normal"></div>75–109%</div>
         <div class="legend-item"><div class="legend-swatch high"></div>≥110%</div>
@@ -204,19 +204,14 @@
 
   <section class="grid-tier-2" style="margin-bottom:20px;">
 
-    <!-- Mid-C Price + BPA Fuel Mix -->
+    <!-- Water Supply + BPA Fuel Mix -->
     <div class="panel">
       <div class="panel-header">
-        <div class="panel-title">Mid-Columbia Market</div>
-        <div class="panel-source">EIA Wholesale · EIA-930</div>
+        <div class="panel-title">Columbia Water Supply</div>
+        <div class="panel-source">NWRFC · EIA-930</div>
       </div>
       <div class="panel-body">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-          <div class="data-item">
-            <div class="di-label">Mid-C Peak DA</div>
-            <div class="di-val lg" id="midc-value">—</div>
-            <div class="di-unit" id="midc-sub">price pending</div>
-          </div>
+        <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px;">
           <div class="data-item">
             <div class="di-label">WSF · The Dalles</div>
             <div class="di-val lg" id="wsf-value">—</div>
@@ -231,7 +226,6 @@
             <div class="stat"><div class="label">Thermal</div><div class="num" id="bpa-therm-pct">—</div></div>
           </div>
         </div>
-        <div class="chart-wrap hidden" id="midc-chart-wrap"><canvas id="midc-chart"></canvas></div>
       </div>
     </div>
 
@@ -301,7 +295,6 @@ var MOCK_DATA = {
   meta: { last_updated_pt: "loading…", next_update_pt: "—" },
   basins: [],
   wsf: { site: "The Dalles", pct_normal: null, forecast_maf: null, delta_prior_maf: null },
-  midc: { peak_da: null, offpeak_da: null, wow_pct: null, history: [] },
   bpa_mix: { hydro_pct: null, wind_pct: null, thermal_pct: null },
   usace: [],
   caiso: { hydro_mw: null, hydro_share_pct: null, sp15_da: null, history: [] },
@@ -362,7 +355,6 @@ function applyLiveData(live) {
   var out = JSON.parse(JSON.stringify(MOCK_DATA));
   if (live.meta && live.meta.last_updated_pt) out.meta = live.meta;
   if (live.bpa_mix && live.bpa_mix.hydro_pct != null) out.bpa_mix = live.bpa_mix;
-  if (live.midc    && live.midc.peak_da     != null) out.midc    = live.midc;
   if (live.wsf     && live.wsf.pct_normal   != null) out.wsf     = live.wsf;
   if (live.caiso   && live.caiso.hydro_mw   != null) out.caiso   = live.caiso;
   if (live.basins      && live.basins.length)      out.basins      = live.basins;
@@ -375,19 +367,6 @@ function applyLiveData(live) {
 function render(d) {
   document.getElementById("last-updated").textContent = d.meta.last_updated_pt;
   document.getElementById("next-update").textContent  = d.meta.next_update_pt;
-
-  // Mid-C price
-  var midcEl = document.getElementById("midc-value");
-  if (d.midc.peak_da != null) {
-    midcEl.textContent = "$" + d.midc.peak_da.toFixed(2);
-    midcEl.className = "di-val lg";
-    document.getElementById("midc-sub").textContent = d.midc.wow_pct != null
-      ? "/MWh · " + (d.midc.wow_pct > 0 ? "+" : "") + d.midc.wow_pct + "% WoW"
-      : "/MWh peak DA";
-  } else {
-    midcEl.textContent = "pending";
-    midcEl.className = "di-val pending";
-  }
 
   // WSF
   var wsfEl = document.getElementById("wsf-value");
@@ -445,10 +424,6 @@ function render(d) {
            '<div class="date">' + escText(a.date) + '</div></a>';
   }).join("");
 
-  if (d.midc.history && d.midc.history.length) {
-    document.getElementById("midc-chart-wrap").classList.remove("hidden");
-    renderMidCChart(d.midc.history);
-  }
   if (d.caiso.history && d.caiso.history.length) {
     document.getElementById("caiso-chart-wrap").classList.remove("hidden");
     renderCAISOChart(d.caiso.history);
@@ -506,6 +481,16 @@ function basinFill(pct) {
   if (c === "high") return "#4a90c9";
   return "#2a2d3e";
 }
+function basinStatus(data) {
+  if (!data) return "No data";
+  if (data.season_status === "melted_out") return "Melted out";
+  if (data.pct_median == null) return "No median";
+  return basinClass(data.pct_median).toUpperCase();
+}
+function basinBasisLabel(data) {
+  if (!data || !data.pct_basis) return "median";
+  return data.pct_basis === "median_peak" ? "median peak SWE" : "daily median SWE";
+}
 
 function renderBasinMap(basins) {
   currentBasinData = {};
@@ -539,7 +524,7 @@ function renderBasinMap(basins) {
   geoBasins.features.forEach(function (f) {
     var name = f.properties.name;
     var data = currentBasinData[name];
-    var pct  = data ? data.pct_median : null;
+    var pct  = data && data.season_status !== "melted_out" ? data.pct_median : null;
     var dStr = PATH(f);
     if (!dStr) return;
     parts.push('<path class="basin-shape" d="' + dStr + '" fill="' + basinFill(pct) + '" fill-opacity="0.65" data-name="' + escAttr(name) + '"/>');
@@ -596,8 +581,11 @@ function showBasinTooltip(evt, name) {
   if (data) {
     var dSign = data.delta_7d > 0 ? "+" : "";
     html += '<div class="tt-row"><span>SWE</span><strong>' + data.swe_in.toFixed(1) + '"</strong></div>';
-    html += '<div class="tt-row"><span>% of median</span><strong>' + data.pct_median + '%</strong></div>';
-    html += '<div class="tt-row"><span>Δ 7-day</span><strong>' + dSign + data.delta_7d + '</strong></div>';
+    html += '<div class="tt-row"><span>Status</span><strong>' + escText(basinStatus(data)) + '</strong></div>';
+    html += '<div class="tt-row"><span>% basis</span><strong>' + (data.pct_median == null ? "n/a" : data.pct_median + "%") + '</strong></div>';
+    html += '<div class="tt-row"><span>Basis</span><strong>' + escText(basinBasisLabel(data)) + '</strong></div>';
+    html += '<div class="tt-row"><span>Δ 7-day</span><strong>' + (data.delta_7d == null ? "n/a" : dSign + data.delta_7d) + '</strong></div>';
+    html += '<div class="tt-row"><span>As of</span><strong>' + escText(data.as_of || "") + '</strong></div>';
     html += '<div class="tt-row" style="margin-top:4px;font-size:9px;color:var(--text-faint);">Click for details</div>';
   } else {
     html += '<div class="tt-row" style="color:var(--text-faint);">No data yet</div>';
@@ -643,10 +631,11 @@ function openBasinDetail(name) {
     var dCls = data.delta_7d > 0 ? "up" : (data.delta_7d < 0 ? "down" : "");
     var dSign = data.delta_7d > 0 ? "+" : "";
     grid.innerHTML =
-      '<div class="detail-stat gold"><div class="label">% of Median</div><div class="num">' + data.pct_median + '%</div></div>' +
+      '<div class="detail-stat gold"><div class="label">Status</div><div class="num" style="font-size:13px;">' + escText(basinStatus(data)) + '</div></div>' +
+      '<div class="detail-stat"><div class="label">% Basis</div><div class="num">' + (data.pct_median == null ? "n/a" : data.pct_median + "%") + '</div></div>' +
       '<div class="detail-stat"><div class="label">SWE</div><div class="num">' + data.swe_in.toFixed(1) + '"</div></div>' +
-      '<div class="detail-stat"><div class="label">7-day Δ</div><div class="num ' + dCls + '">' + dSign + data.delta_7d + '</div></div>' +
-      '<div class="detail-stat"><div class="label">Status</div><div class="num" style="font-size:13px;">' + basinClass(data.pct_median).toUpperCase() + '</div></div>';
+      '<div class="detail-stat"><div class="label">7-day Δ</div><div class="num ' + dCls + '">' + (data.delta_7d == null ? "n/a" : dSign + data.delta_7d) + '</div></div>' +
+      '<div class="detail-stat"><div class="label">Basis</div><div class="num" style="font-size:13px;">' + escText(basinBasisLabel(data)) + '</div></div>';
   }
   drawer.classList.add("open");
   drawer.scrollIntoView({ behavior: "smooth", block: "nearest" });
@@ -663,42 +652,6 @@ Chart.defaults.color = "#9498a8";
 Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif";
 Chart.defaults.font.size = 11;
 Chart.defaults.borderColor = "#2a2d3e";
-
-function renderMidCChart(history) {
-  var ctx = document.getElementById("midc-chart").getContext("2d");
-  var grad = ctx.createLinearGradient(0, 0, 0, 220);
-  grad.addColorStop(0, "rgba(201, 169, 97, 0.35)");
-  grad.addColorStop(1, "rgba(201, 169, 97, 0.00)");
-  new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: history.map(function (h) { return h.d; }),
-      datasets: [{
-        data: history.map(function (h) { return h.p; }),
-        borderColor: "#c9a961",
-        backgroundColor: grad,
-        fill: true, tension: 0.3, borderWidth: 2,
-        pointRadius: 0, pointHoverRadius: 4,
-        pointHoverBackgroundColor: "#c9a961", pointHoverBorderColor: "#fff"
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: "#1c1f2e", borderColor: "#3a3e54", borderWidth: 1,
-          padding: 10, titleColor: "#e8e9ed", bodyColor: "#c9a961", displayColors: false,
-          callbacks: { label: function (c) { return "$" + c.parsed.y.toFixed(2) + " /MWh"; } }
-        }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { maxTicksLimit: 6 } },
-        y: { grid: { color: "#22253390" }, ticks: { callback: function (v) { return "$" + v; } } }
-      }
-    }
-  });
-}
 
 function renderCAISOChart(history) {
   var ctx = document.getElementById("caiso-chart").getContext("2d");
