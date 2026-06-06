@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-06-05 08:54 PT",
-    "next_update_pt": "2026-06-06 08:54 PT",
+    "last_updated_pt": "2026-06-05 17:35 PT",
+    "next_update_pt": "2026-06-06 17:35 PT",
     "sources_ok": [
       "bpa_mix",
       "wsf",
@@ -16,7 +16,7 @@
       "pct_median": 5,
       "pct_basis": "median_peak",
       "swe_in": 0.2,
-      "delta_7d": 3.9,
+      "delta_7d": 4.0,
       "season_status": "residual_snowpack",
       "as_of": "2026-06-04"
     },
@@ -25,7 +25,7 @@
       "pct_median": 21,
       "pct_basis": "median_peak",
       "swe_in": 4.0,
-      "delta_7d": -1.1,
+      "delta_7d": -0.9,
       "season_status": "residual_snowpack",
       "as_of": "2026-06-04"
     },
@@ -34,7 +34,7 @@
       "pct_median": 0,
       "pct_basis": "median_peak",
       "swe_in": 0.1,
-      "delta_7d": -2.6,
+      "delta_7d": -2.5,
       "season_status": "residual_snowpack",
       "as_of": "2026-06-04"
     },
@@ -52,7 +52,7 @@
       "pct_median": 0,
       "pct_basis": "median_peak",
       "swe_in": 0.0,
-      "delta_7d": -1.9,
+      "delta_7d": -1.7,
       "season_status": "melted_out",
       "as_of": "2026-06-04"
     },
@@ -61,7 +61,7 @@
       "pct_median": 8,
       "pct_basis": "median_peak",
       "swe_in": 1.8,
-      "delta_7d": 1.2,
+      "delta_7d": 0.5,
       "season_status": "residual_snowpack",
       "as_of": "2026-06-04"
     },
@@ -97,7 +97,7 @@
       "pct_median": 0,
       "pct_basis": "median_peak",
       "swe_in": 0.0,
-      "delta_7d": -41.7,
+      "delta_7d": 0.0,
       "season_status": "melted_out",
       "as_of": "2026-06-04"
     },
@@ -115,7 +115,7 @@
     "site": "The Dalles",
     "pct_normal": 10,
     "forecast_maf": null,
-    "as_of": "2026-06-05"
+    "as_of": "2026-06-06"
   },
   "bpa_mix": {
     "hydro_pct": 74,
@@ -127,13 +127,13 @@
       "project": "Lower Granite",
       "discharge_kcfs": 5.3,
       "forebay_ft": null,
-      "as_of": "2026-06-05"
+      "as_of": "2026-06-06"
     },
     {
       "project": "The Dalles",
       "discharge_kcfs": 217.0,
       "forebay_ft": null,
-      "as_of": "2026-06-05"
+      "as_of": "2026-06-06"
     }
   ],
   "caiso": {
@@ -141,7 +141,7 @@
     "hydro_share_pct": 15,
     "sp15_da": null,
     "history": [],
-    "as_of": "2026-06-05"
+    "as_of": "2026-06-06"
   },
   "archive": [
     {
