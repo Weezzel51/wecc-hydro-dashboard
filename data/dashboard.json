@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-06-09 08:54 PT",
-    "next_update_pt": "2026-06-10 08:54 PT",
+    "last_updated_pt": "2026-06-10 09:35 PT",
+    "next_update_pt": "2026-06-11 09:35 PT",
     "sources_ok": [
       "bpa_mix",
       "wsf",
@@ -13,135 +13,72 @@
   "basins": [
     {
       "name": "Upper Columbia (US)",
-      "pct_median": 1,
+      "pct_median": 0,
       "pct_basis": "median_peak",
-      "swe_in": 0.2,
-      "delta_7d": 0.1,
+      "swe_in": 0.1,
+      "delta_7d": -3.0,
       "season_status": "residual_snowpack",
-      "as_of": "2026-06-08"
+      "as_of": "2026-06-09"
     },
     {
       "name": "Pend Oreille",
-      "pct_median": 20,
-      "pct_basis": "median_peak",
-      "swe_in": 3.3,
-      "delta_7d": -1.5,
-      "season_status": "residual_snowpack",
-      "as_of": "2026-06-08"
+      "pct_median": 52,
+      "pct_basis": "daily_median",
+      "swe_in": 5.5,
+      "delta_7d": 36.6,
+      "season_status": "active_snowpack",
+      "as_of": "2026-06-09"
     },
     {
       "name": "Yakima",
       "pct_median": 0,
       "pct_basis": "median_peak",
-      "swe_in": 0.1,
-      "delta_7d": -1.4,
-      "season_status": "residual_snowpack",
-      "as_of": "2026-06-08"
-    },
-    {
-      "name": "Clearwater",
-      "pct_median": 14,
-      "pct_basis": "median_peak",
-      "swe_in": 2.5,
-      "delta_7d": -3.4,
-      "season_status": "residual_snowpack",
-      "as_of": "2026-06-08"
+      "swe_in": 0.0,
+      "delta_7d": null,
+      "season_status": "melted_out",
+      "as_of": "2026-06-09"
     },
     {
       "name": "Salmon",
-      "pct_median": 10,
+      "pct_median": 2,
       "pct_basis": "median_peak",
       "swe_in": 0.0,
-      "delta_7d": 9.9,
+      "delta_7d": 2.0,
       "season_status": "melted_out",
-      "as_of": "2026-06-08"
-    },
-    {
-      "name": "Upper Snake",
-      "pct_median": 7,
-      "pct_basis": "median_peak",
-      "swe_in": 1.0,
-      "delta_7d": 0.1,
-      "season_status": "residual_snowpack",
-      "as_of": "2026-06-08"
-    },
-    {
-      "name": "Lower Snake",
-      "pct_median": 0,
-      "pct_basis": "median_peak",
-      "swe_in": 0.0,
-      "delta_7d": 0.0,
-      "season_status": "melted_out",
-      "as_of": "2026-06-08"
-    },
-    {
-      "name": "Owyhee",
-      "pct_median": 1,
-      "pct_basis": "median_peak",
-      "swe_in": 0.1,
-      "delta_7d": -1.2,
-      "season_status": "residual_snowpack",
-      "as_of": "2026-06-08"
-    },
-    {
-      "name": "Lower Columbia",
-      "pct_median": 1,
-      "pct_basis": "median_peak",
-      "swe_in": 0.1,
-      "delta_7d": 1.0,
-      "season_status": "residual_snowpack",
-      "as_of": "2026-06-08"
-    },
-    {
-      "name": "Northern Sierra (Feather)",
-      "pct_median": 0,
-      "pct_basis": "median_peak",
-      "swe_in": 0.0,
-      "delta_7d": 0.0,
-      "season_status": "melted_out",
-      "as_of": "2026-06-08"
-    },
-    {
-      "name": "Southern Sierra (San Joaq.)",
-      "pct_median": 0,
-      "pct_basis": "median_peak",
-      "swe_in": 0.0,
-      "delta_7d": 0.0,
-      "season_status": "melted_out",
-      "as_of": "2026-06-08"
+      "as_of": "2026-06-09"
     }
   ],
   "wsf": {
     "site": "The Dalles",
     "pct_normal": 10,
     "forecast_maf": null,
-    "as_of": "2026-06-09"
+    "as_of": "2026-06-10"
   },
   "bpa_mix": {
-    "hydro_pct": 85,
-    "wind_pct": 3,
-    "thermal_pct": 13
+    "hydro_pct": 67,
+    "wind_pct": 21,
+    "thermal_pct": 12
   },
   "usace": [
     {
       "project": "Lower Granite",
-      "discharge_kcfs": 4.3,
+      "discharge_kcfs": 4.5,
       "forebay_ft": null,
-      "as_of": "2026-06-09"
+      "as_of": "2026-06-10"
     },
     {
       "project": "The Dalles",
-      "discharge_kcfs": 203.0,
+      "discharge_kcfs": 213.0,
       "forebay_ft": null,
-      "as_of": "2026-06-09"
+      "as_of": "2026-06-10"
     }
   ],
   "caiso": {
-    "hydro_mw": 2830,
-    "hydro_share_pct": 15,
+    "hydro_mw": 2642,
+    "hydro_share_pct": 14,
     "sp15_da": null,
     "history": [],
-    "as_of": "2026-06-09"
+    "as_of": "2026-06-10"
   },
   "archive": [
     {
