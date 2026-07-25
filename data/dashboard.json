@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-07-24 07:53 PT",
-    "next_update_pt": "2026-07-25 07:53 PT",
+    "last_updated_pt": "2026-07-25 07:36 PT",
+    "next_update_pt": "2026-07-26 07:36 PT",
     "sources_ok": [
       "bpa_mix",
       "wsf",
@@ -16,18 +16,18 @@
       "pct_median": 0,
       "pct_basis": "median_peak",
       "swe_in": 0.0,
-      "delta_7d": 0.0,
+      "delta_7d": -0.0,
       "season_status": "melted_out",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Pend Oreille",
       "pct_median": 0,
       "pct_basis": "median_peak",
       "swe_in": 0.0,
-      "delta_7d": -0.1,
+      "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Yakima",
@@ -36,7 +36,7 @@
       "swe_in": 0.0,
       "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Clearwater",
@@ -45,7 +45,7 @@
       "swe_in": 0.1,
       "delta_7d": 0.0,
       "season_status": "residual_snowpack",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Salmon",
@@ -54,7 +54,7 @@
       "swe_in": 0.0,
       "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Upper Snake",
@@ -63,7 +63,7 @@
       "swe_in": 0.0,
       "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Lower Snake",
@@ -72,7 +72,7 @@
       "swe_in": 0.0,
       "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Owyhee",
@@ -81,7 +81,7 @@
       "swe_in": 0.0,
       "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Lower Columbia",
@@ -90,7 +90,7 @@
       "swe_in": 0.0,
       "delta_7d": -0.0,
       "season_status": "melted_out",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Northern Sierra (Feather)",
@@ -99,7 +99,7 @@
       "swe_in": 0.1,
       "delta_7d": 0.0,
       "season_status": "residual_snowpack",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     },
     {
       "name": "Southern Sierra (San Joaq.)",
@@ -108,40 +108,40 @@
       "swe_in": 0.0,
       "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-07-23"
+      "as_of": "2026-07-24"
     }
   ],
   "wsf": {
     "site": "The Dalles",
     "pct_normal": 10,
     "forecast_maf": null,
-    "as_of": "2026-07-24"
+    "as_of": "2026-07-25"
   },
   "bpa_mix": {
-    "hydro_pct": 73,
-    "wind_pct": 3,
-    "thermal_pct": 25
+    "hydro_pct": 68,
+    "wind_pct": 9,
+    "thermal_pct": 23
   },
   "usace": [
     {
       "project": "Lower Granite",
       "discharge_kcfs": 1.3,
       "forebay_ft": null,
-      "as_of": "2026-07-24"
+      "as_of": "2026-07-25"
     },
     {
       "project": "The Dalles",
-      "discharge_kcfs": 137.0,
+      "discharge_kcfs": 130.0,
       "forebay_ft": null,
-      "as_of": "2026-07-24"
+      "as_of": "2026-07-25"
     }
   ],
   "caiso": {
-    "hydro_mw": 2933,
-    "hydro_share_pct": 10,
+    "hydro_mw": 3301,
+    "hydro_share_pct": 11,
     "sp15_da": null,
     "history": [],
-    "as_of": "2026-07-24"
+    "as_of": "2026-07-25"
   },
   "archive": [
     {
