@@ -1,9 +1,10 @@
 {
   "meta": {
-    "last_updated_pt": "2026-10-17 09:08 PT",
-    "next_update_pt": "2026-10-18 09:08 PT",
+    "last_updated_pt": "2026-10-18 09:21 PT",
+    "next_update_pt": "2026-10-19 09:21 PT",
     "sources_ok": [
       "bpa_mix",
+      "caiso",
       "usace",
       "basins"
     ]
@@ -13,19 +14,19 @@
       "name": "Upper Columbia (US)",
       "pct_median": 6,
       "pct_basis": "median_peak",
-      "swe_in": 0.1,
+      "swe_in": 0.0,
       "delta_7d": 6.0,
-      "season_status": "residual_snowpack",
-      "as_of": "2026-10-16"
+      "season_status": "melted_out",
+      "as_of": "2026-10-17"
     },
     {
       "name": "Pend Oreille",
-      "pct_median": 67,
+      "pct_median": 63,
       "pct_basis": "median_peak",
       "swe_in": 0.3,
-      "delta_7d": 55.4,
+      "delta_7d": 23.9,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-16"
+      "as_of": "2026-10-17"
     },
     {
       "name": "Yakima",
@@ -34,7 +35,7 @@
       "swe_in": 0.0,
       "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-10-16"
+      "as_of": "2026-10-17"
     },
     {
       "name": "Clearwater",
@@ -43,43 +44,43 @@
       "swe_in": 0.1,
       "delta_7d": -0.0,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-16"
+      "as_of": "2026-10-17"
     },
     {
       "name": "Salmon",
-      "pct_median": 12,
+      "pct_median": 5,
       "pct_basis": "median_peak",
       "swe_in": 0.1,
-      "delta_7d": 11.7,
+      "delta_7d": 4.2,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-16"
+      "as_of": "2026-10-17"
     },
     {
       "name": "Upper Snake",
-      "pct_median": 27,
-      "pct_basis": "median_peak",
-      "swe_in": 0.1,
-      "delta_7d": 26.9,
-      "season_status": "residual_snowpack",
-      "as_of": "2026-10-16"
-    },
-    {
-      "name": "Lower Snake",
       "pct_median": 2,
       "pct_basis": "median_peak",
       "swe_in": 0.1,
-      "delta_7d": 2.0,
+      "delta_7d": -6.3,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-16"
+      "as_of": "2026-10-17"
+    },
+    {
+      "name": "Lower Snake",
+      "pct_median": 13,
+      "pct_basis": "median_peak",
+      "swe_in": 0.1,
+      "delta_7d": 12.7,
+      "season_status": "residual_snowpack",
+      "as_of": "2026-10-17"
     },
     {
       "name": "Owyhee",
-      "pct_median": 12,
+      "pct_median": 9,
       "pct_basis": "median_peak",
       "swe_in": 0.1,
-      "delta_7d": 12.0,
+      "delta_7d": 8.9,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-16"
+      "as_of": "2026-10-17"
     },
     {
       "name": "Lower Columbia",
@@ -88,7 +89,7 @@
       "swe_in": 0.0,
       "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-10-16"
+      "as_of": "2026-10-17"
     },
     {
       "name": "Northern Sierra (Feather)",
@@ -97,7 +98,7 @@
       "swe_in": 0.1,
       "delta_7d": 0.0,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-16"
+      "as_of": "2026-10-17"
     },
     {
       "name": "Southern Sierra (San Joaq.)",
@@ -106,30 +107,36 @@
       "swe_in": 0.0,
       "delta_7d": 0.0,
       "season_status": "melted_out",
-      "as_of": "2026-10-16"
+      "as_of": "2026-10-17"
     }
   ],
   "wsf": {},
   "bpa_mix": {
-    "hydro_pct": 63,
-    "wind_pct": 0,
-    "thermal_pct": 37
+    "hydro_pct": 51,
+    "wind_pct": 16,
+    "thermal_pct": 33
   },
   "usace": [
     {
       "project": "Lower Granite",
       "discharge_kcfs": 0.6,
       "forebay_ft": null,
-      "as_of": "2026-10-17"
+      "as_of": "2026-10-18"
     },
     {
       "project": "The Dalles",
-      "discharge_kcfs": 84.2,
+      "discharge_kcfs": 81.0,
       "forebay_ft": null,
-      "as_of": "2026-10-17"
+      "as_of": "2026-10-18"
     }
   ],
-  "caiso": {},
+  "caiso": {
+    "hydro_mw": 1712,
+    "hydro_share_pct": 9,
+    "sp15_da": null,
+    "history": [],
+    "as_of": "2026-10-18"
+  },
   "archive": [
     {
       "issue": "ISSUE 09",
