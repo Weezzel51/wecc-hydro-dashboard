@@ -1,7 +1,7 @@
 {
   "meta": {
-    "last_updated_pt": "2026-10-30 11:24 PT",
-    "next_update_pt": "2026-10-31 11:24 PT",
+    "last_updated_pt": "2026-10-31 10:30 PT",
+    "next_update_pt": "2026-11-01 10:30 PT",
     "sources_ok": [
       "bpa_mix",
       "caiso",
@@ -12,75 +12,75 @@
   "basins": [
     {
       "name": "Upper Columbia (US)",
-      "pct_median": 27,
+      "pct_median": 26,
       "pct_basis": "median_peak",
       "swe_in": 0.4,
-      "delta_7d": 22.0,
+      "delta_7d": 24.1,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     },
     {
       "name": "Pend Oreille",
-      "pct_median": 103,
+      "pct_median": 94,
       "pct_basis": "daily_median",
       "swe_in": 0.9,
-      "delta_7d": 66.0,
+      "delta_7d": 58.4,
       "season_status": "active_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     },
     {
       "name": "Yakima",
-      "pct_median": 98,
+      "pct_median": 95,
       "pct_basis": "median_peak",
       "swe_in": 0.9,
-      "delta_7d": 98.0,
+      "delta_7d": 93.1,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     },
     {
       "name": "Clearwater",
-      "pct_median": 218,
+      "pct_median": 153,
       "pct_basis": "daily_median",
       "swe_in": 0.9,
-      "delta_7d": 218.0,
+      "delta_7d": 153.0,
       "season_status": "active_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     },
     {
       "name": "Salmon",
-      "pct_median": 28,
+      "pct_median": 68,
       "pct_basis": "daily_median",
-      "swe_in": 0.2,
-      "delta_7d": 5.9,
+      "swe_in": 0.4,
+      "delta_7d": 55.0,
       "season_status": "active_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     },
     {
       "name": "Upper Snake",
-      "pct_median": 23,
+      "pct_median": 34,
       "pct_basis": "daily_median",
       "swe_in": 0.3,
-      "delta_7d": 17.3,
+      "delta_7d": 32.8,
       "season_status": "active_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     },
     {
       "name": "Lower Snake",
-      "pct_median": 74,
+      "pct_median": 70,
       "pct_basis": "median_peak",
       "swe_in": 0.4,
-      "delta_7d": 20.9,
+      "delta_7d": 23.1,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     },
     {
       "name": "Owyhee",
-      "pct_median": 21,
+      "pct_median": 29,
       "pct_basis": "median_peak",
-      "swe_in": 0.1,
-      "delta_7d": 12.7,
+      "swe_in": 0.3,
+      "delta_7d": 22.8,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     },
     {
       "name": "Lower Columbia",
@@ -89,53 +89,53 @@
       "swe_in": 0.7,
       "delta_7d": 18.0,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     },
     {
       "name": "Northern Sierra (Feather)",
-      "pct_median": 0,
+      "pct_median": 1,
       "pct_basis": "median_peak",
-      "swe_in": 0.0,
-      "delta_7d": 0.0,
-      "season_status": "melted_out",
-      "as_of": "2026-10-29"
+      "swe_in": 0.3,
+      "delta_7d": 1.0,
+      "season_status": "residual_snowpack",
+      "as_of": "2026-10-30"
     },
     {
       "name": "Southern Sierra (San Joaq.)",
-      "pct_median": 0,
+      "pct_median": 1,
       "pct_basis": "median_peak",
-      "swe_in": 0.1,
-      "delta_7d": 0.0,
+      "swe_in": 0.4,
+      "delta_7d": 1.0,
       "season_status": "residual_snowpack",
-      "as_of": "2026-10-29"
+      "as_of": "2026-10-30"
     }
   ],
   "wsf": {},
   "bpa_mix": {
-    "hydro_pct": 66,
-    "wind_pct": 2,
+    "hydro_pct": 67,
+    "wind_pct": 1,
     "thermal_pct": 32
   },
   "usace": [
     {
       "project": "Lower Granite",
-      "discharge_kcfs": 1.1,
+      "discharge_kcfs": 0.9,
       "forebay_ft": null,
-      "as_of": "2026-10-30"
+      "as_of": "2026-10-31"
     },
     {
       "project": "The Dalles",
-      "discharge_kcfs": 84.2,
+      "discharge_kcfs": 84.4,
       "forebay_ft": null,
-      "as_of": "2026-10-30"
+      "as_of": "2026-10-31"
     }
   ],
   "caiso": {
-    "hydro_mw": 1532,
-    "hydro_share_pct": 7,
+    "hydro_mw": 1328,
+    "hydro_share_pct": 6,
     "sp15_da": null,
     "history": [],
-    "as_of": "2026-10-30"
+    "as_of": "2026-10-31"
   },
   "archive": [
     {
